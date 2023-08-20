@@ -6,7 +6,7 @@
 #include <sstream>
 
 
-void event(sf::RenderWindow & window, Robot & robot)
+void event(sf::RenderWindow & window, Robot & robot, bool & isIaEnabled)
 {
     sf::Event event;
     while (window.pollEvent(event))
@@ -37,6 +37,12 @@ void event(sf::RenderWindow & window, Robot & robot)
             case sf::Keyboard::D:
             case sf::Keyboard::Right:
                 robot.setAngularVelocity(90.0);
+                break;
+            case sf::Keyboard::I:
+            case sf::Keyboard::Space:
+                isIaEnabled = !isIaEnabled;
+                robot.setLinearVelocity(0.0);
+                robot.setAngularVelocity(0.0);
                 break;
             default:
                 break;
@@ -93,12 +99,13 @@ int main()
     auto lastTime = std::chrono::steady_clock::now();
     int fpsCount = 0;
     float fpsTime = 0.0;
+    bool isIaEnabled = true;
     while (window.isOpen())
     {
-        event(window, robot);
+        event(window, robot, isIaEnabled);
 
         // Update robot IA
-        if (!robot.getLineTrackSensors().empty())
+        if (isIaEnabled && !robot.getLineTrackSensors().empty())
         {
             robot.setLinearVelocity(40.0);
             if (robot.getLineTrackSensors()[0].getDetected())
