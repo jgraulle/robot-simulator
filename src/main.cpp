@@ -81,6 +81,7 @@ int main()
     sf::RenderWindow window(sf::VideoMode(800, 600), "robot-simulator",
             sf::Style::Titlebar | sf::Style::Close);
     window.setVerticalSyncEnabled(true);
+    //window.setFramerateLimit(60);
 
     // Build a robot
     Robot robot(sf::Vector2f(20.0, 20.0));
@@ -90,6 +91,8 @@ int main()
     robot.addLineTrackSensor(LineTrackSensor(sf::Vector2f(5.0, 0.0), road));
 
     auto lastTime = std::chrono::steady_clock::now();
+    int fpsCount = 0;
+    float fpsTime = 0.0;
     while (window.isOpen())
     {
         event(window, robot);
@@ -104,11 +107,23 @@ int main()
                 robot.setAngularVelocity(90.0);
         }
 
-        // Update robot
+        // Compute elapsedTime from last update
         auto currentTime = std::chrono::steady_clock::now();
-        robot.update(std::chrono::duration<float>(currentTime-lastTime).count(),
-                sf::Transform::Identity);
+        float elapsedTime = std::chrono::duration<float>(currentTime-lastTime).count();
         lastTime = currentTime;
+        fpsTime += elapsedTime;
+        fpsCount++;
+        if (fpsTime > 1.0)
+        {
+            std::ostringstream oss;
+            oss << "robot-simulator - " << static_cast<int>(fpsCount) << " fps";
+            window.setTitle(oss.str());
+            fpsTime -= 1.0;
+            fpsCount = 0;
+        }
+
+        // Update robot
+        robot.update(elapsedTime, sf::Transform::Identity);
 
         // Draw map and robot
         window.clear();
