@@ -9,13 +9,15 @@
 #include <assert.h>
 
 
-IrProximitySensor::IrProximitySensor(float distanceMax, const sf::Vector2f & position, const Map & map)
+IrProximitySensor::IrProximitySensor(float distanceMax, const sf::Vector2f & position,
+        float orientation, const Map & map)
     : _distanceMax(distanceMax)
     , _map(map)
     , _distanceDetected(0u)
     , _line(sf::Lines, 2)
 {
     setPosition(position);
+    setRotation(orientation);
 
     _line[0].color = sf::Color::Red;
     _line[1].color = sf::Color::Red;
