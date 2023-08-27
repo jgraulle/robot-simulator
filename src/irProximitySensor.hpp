@@ -13,7 +13,9 @@ class IrProximitySensor : public sf::Drawable, public sf::Transformable
 public:
     //! @param distanceMax: in pixel
     //! @param position: in pixel
-    IrProximitySensor(float distanceMax, const sf::Vector2f & position, const Map & map);
+    //! @param orientation: in degree
+    IrProximitySensor(float distanceMax, const sf::Vector2f & position, float orientation,
+            const Map & map);
 
     inline std::size_t getDistanceDetected() const {return _distanceDetected;}
 
