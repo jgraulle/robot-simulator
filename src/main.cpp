@@ -6,7 +6,7 @@
 #include <sstream>
 
 
-void event(sf::RenderWindow & window, Robot & robot, bool & isIaEnabled)
+void event(sf::RenderWindow & window, Robot & robot, bool & isIaEnabled, float & speed)
 {
     sf::Event event;
     while (window.pollEvent(event))
@@ -24,25 +24,35 @@ void event(sf::RenderWindow & window, Robot & robot, bool & isIaEnabled)
                 break;
             case sf::Keyboard::Z:
             case sf::Keyboard::Up:
-                robot.setLinearVelocity(100.0);
+                robot.setLinearVelocity(100.0*speed);
                 break;
             case sf::Keyboard::S:
             case sf::Keyboard::Down:
-                robot.setLinearVelocity(-100.0);
+                robot.setLinearVelocity(-100.0*speed);
                 break;
             case sf::Keyboard::Q:
             case sf::Keyboard::Left:
-                robot.setAngularVelocity(-90.0);
+                robot.setAngularVelocity(-90.0*speed);
                 break;
             case sf::Keyboard::D:
             case sf::Keyboard::Right:
-                robot.setAngularVelocity(90.0);
+                robot.setAngularVelocity(90.0*speed);
                 break;
             case sf::Keyboard::I:
             case sf::Keyboard::Space:
                 isIaEnabled = !isIaEnabled;
                 robot.setLinearVelocity(0.0);
                 robot.setAngularVelocity(0.0);
+                break;
+            case sf::Keyboard::PageUp:
+                speed *= 1.1;
+                robot.setLinearVelocity(robot.getLinearVelocity()*1.1);
+                robot.setAngularVelocity(robot.getAngularVelocity()*1.1);
+                break;
+            case sf::Keyboard::PageDown:
+                speed *= 0.9;
+                robot.setLinearVelocity(robot.getLinearVelocity()*0.9);
+                robot.setAngularVelocity(robot.getAngularVelocity()*0.9);
                 break;
             default:
                 break;
@@ -99,9 +109,10 @@ int main()
     int fpsCount = 0;
     float fpsTime = 0.0;
     bool isIaEnabled = true;
+    float speed = 1.0;
     while (window.isOpen())
     {
-        event(window, robot, isIaEnabled);
+        event(window, robot, isIaEnabled, speed);
 
         // Update robot IA
         if (isIaEnabled && !robot.getLineTrackSensors().empty())
