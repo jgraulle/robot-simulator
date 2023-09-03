@@ -16,6 +16,7 @@ add_executable(robotSimulator
     src/map.cpp
     src/lineTrackSensor.cpp
     src/switchSensor.cpp
+    src/ultrasonicSensor.cpp
 )
 
 target_link_libraries(robotSimulator sfml-graphics sfml-window sfml-system)
