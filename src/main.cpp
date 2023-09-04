@@ -1,9 +1,11 @@
 #include "robot.hpp"
 #include "map.hpp"
+#include "irProximitySensor.hpp"
+#include "lineTrackSensor.hpp"
 
 #include <SFML/Graphics.hpp>
-#include <iostream>
 #include <sstream>
+#include <memory>
 
 
 void event(sf::RenderWindow & window, Robot & robot, bool & isIaEnabled, float & speed)
@@ -101,9 +103,10 @@ int main()
     // Build a robot
     Robot robot(sf::Vector2f(20.0, 20.0), map);
     robot.setPosition(window.getView().getSize().x/2.0, 225.0);
-    robot.addIrProximitySensor(IrProximitySensor(10.0, 80.0, sf::Vector2f(10.0, 10.0), 0.0, map));
-    robot.addIrProximitySensor(IrProximitySensor(10.0, 80.0, sf::Vector2f(10.0, -10.0), 0.0, map));
-    robot.addLineTrackSensor(LineTrackSensor(sf::Vector2f(5.0, 0.0), map, 128u));
+    robot.addSensor(std::make_unique<IrProximitySensor>(10.0, 80.0, sf::Vector2f(10.0, 10.0), 0.0, map));
+    robot.addSensor(std::make_unique<IrProximitySensor>(10.0, 80.0, sf::Vector2f(10.0, -10.0), 0.0, map));
+    robot.addSensor(std::make_unique<LineTrackSensor>(sf::Vector2f(5.0, 0.0), map, 128u));
+    const LineTrackSensor * lineTrackSensor = dynamic_cast<const LineTrackSensor *>(robot.getSensors().back().get());
 
     auto lastTime = std::chrono::steady_clock::now();
     int fpsCount = 0;
@@ -115,10 +118,10 @@ int main()
         event(window, robot, isIaEnabled, speed);
 
         // Update robot IA
-        if (isIaEnabled && !robot.getLineTrackSensors().empty())
+        if (isIaEnabled && lineTrackSensor!=nullptr)
         {
             robot.setLinearVelocity(40.0);
-            if (robot.getLineTrackSensors()[0].isDetected())
+            if (lineTrackSensor->isDetected())
                 robot.setAngularVelocity(-90.0);
             else
                 robot.setAngularVelocity(90.0);

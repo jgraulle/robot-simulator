@@ -8,8 +8,7 @@
 Robot::Robot(const sf::Vector2f & size, const Map & map)
     : _size(size)
     , _shape(std::make_unique<sf::RectangleShape>(size))
-    , _irProximitySensors()
-    , _lineTrackSensors()
+    , _sensors()
     , _map(map)
     , _linearVelocity(0.0)
     , _angularVelocity(0.0)
@@ -48,10 +47,8 @@ void Robot::update(float elapsedTime, const sf::Transform & parentWorldTransform
 
     // Update sensors
     auto wolrdTransform = parentWorldTransform*getTransform();
-    for (auto & irProximitySensor : _irProximitySensors)
-        irProximitySensor.update(elapsedTime, wolrdTransform);
-    for (auto & lineTrackSensor : _lineTrackSensors)
-        lineTrackSensor.update(elapsedTime, wolrdTransform);
+    for (auto & sensor : _sensors)
+        sensor->update(elapsedTime, wolrdTransform);
 }
 
 void Robot::draw(sf::RenderTarget & target, sf::RenderStates states) const
@@ -62,10 +59,8 @@ void Robot::draw(sf::RenderTarget & target, sf::RenderStates states) const
     target.draw(*_shape, states);
 
     // Display sensor
-    for (const auto & irProximitySensor : _irProximitySensors)
-        irProximitySensor.draw(target, states);
-    for (const auto & lineTrackSensor : _lineTrackSensors)
-        lineTrackSensor.draw(target, states);
+    for (const auto & sensor : _sensors)
+        target.draw(*sensor, states);
 
     // Display collision detection debug
     states.transform = sf::Transform::Identity;
