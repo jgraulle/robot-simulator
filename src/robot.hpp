@@ -1,11 +1,12 @@
 #ifndef ROBOT_HPP
 #define ROBOT_HPP
 
-#include "irProximitySensor.hpp"
-#include "lineTrackSensor.hpp"
+#include "map.hpp"
+#include "sensor.hpp"
 
 #include <SFML/Graphics/Drawable.hpp>
 #include <SFML/Graphics/Transformable.hpp>
+#include <SFML/Graphics/Vertex.hpp>
 #include <memory>
 #include <chrono>
 
@@ -21,16 +22,11 @@ public:
     //! @param size: in pixel
     Robot(const sf::Vector2f & size, const Map & wall);
 
-    inline void addIrProximitySensor(IrProximitySensor && toAdd)
-            {_irProximitySensors.push_back(std::move(toAdd));}
+    inline void addSensor(std::unique_ptr<Sensor> && toAdd)
+                {_sensors.push_back(std::move(toAdd));}
 
-    inline void addLineTrackSensor(LineTrackSensor && toAdd)
-            {_lineTrackSensors.push_back(std::move(toAdd));}
-
-    inline const auto & getIrProximitySensors() const
-            {return _irProximitySensors;}
-    inline const auto & getLineTrackSensors() const
-            {return _lineTrackSensors;}
+    inline const auto & getSensors() const
+            {return _sensors;}
 
     //! @return in pixel/seconds
     inline float getLinearVelocity() const {return _linearVelocity;}
@@ -52,8 +48,7 @@ public:
 private:
     sf::Vector2f _size;
     std::unique_ptr<sf::Shape> _shape;
-    std::vector<IrProximitySensor> _irProximitySensors;
-    std::vector<LineTrackSensor> _lineTrackSensors;
+    std::vector<std::unique_ptr<Sensor>> _sensors;
     const Map & _map;
     float _linearVelocity;
     float _angularVelocity;

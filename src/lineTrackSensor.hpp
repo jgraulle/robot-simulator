@@ -1,6 +1,8 @@
 #ifndef LINE_TRACK_SENSOR_HPP
 #define LINE_TRACK_SENSOR_HPP
 
+#include "sensor.hpp"
+
 #include <SFML/Graphics/Drawable.hpp>
 #include <SFML/Graphics/Transformable.hpp>
 
@@ -14,7 +16,7 @@ namespace sf
 }
 
 
-class LineTrackSensor : public sf::Drawable, public sf::Transformable
+class LineTrackSensor : public Sensor, public sf::Transformable
 {
 public:
     //! @param position: in pixel
@@ -24,7 +26,7 @@ public:
     inline std::uint8_t getValue() const {return _value;}
 
     //! @param elapsedTime: in second
-    void update(float elapsedTime, const sf::Transform & parentWorldTransform);
+    void update(float elapsedTime, const sf::Transform & parentWorldTransform) override;
 
     void draw(sf::RenderTarget & target, sf::RenderStates states) const override;
 
