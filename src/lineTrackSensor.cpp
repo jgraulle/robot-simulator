@@ -21,10 +21,7 @@ void LineTrackSensor::update(float, const sf::Transform & parentWorldTransform)
 {
     auto worldTranform = parentWorldTransform * getTransform();
     _shape->setPosition(worldTranform.transformPoint(sf::Vector2f(0.0, 0.0)));
-    // TODO Step1 Replace the stub below to compute _value from _map and _shape->getPosition()
-    // Begin stub
-    _value = false;
-    // End stub
+    _value = _map.getLineValue(_shape->getPosition().x, _shape->getPosition().y);
 }
 
 void LineTrackSensor::draw(sf::RenderTarget & target, sf::RenderStates states) const
