@@ -28,12 +28,13 @@ void IrProximitySensor::update(float, const sf::Transform & parentWorldTransform
 {
     auto worldTranform = parentWorldTransform * getTransform();
     _line[0].position = worldTranform.transformPoint(sf::Vector2f(0.0, 0.0));
-    // TODO Step1 Replace the stub below to compute _distanceDetected and _line[1].position from
-    // _distanceMax, _map, worldTranform
-    // Begin stub
-    _distanceDetected = _distanceMax;
-    _line[1].position = worldTranform.transformPoint(sf::Vector2f(_distanceDetected, 0.0));
-    // End stub
+    for (_distanceDetected = 0u; _distanceDetected<_distanceMax; _distanceDetected++)
+    {
+        _line[1].position = worldTranform.transformPoint(sf::Vector2f(_distanceDetected, 0.0));
+        sf::Vector2u position(_line[1].position.x, _line[1].position.y);
+        if (_map.getIsCollision(position.x, position.y))
+            break;
+    }
 
     // TODO Step2 if _distanceDetected < _distanceMin update _distanceDetected
     // (and _line[1].position) to have the same behavior as reel IR sensor
