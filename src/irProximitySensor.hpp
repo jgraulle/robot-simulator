@@ -11,11 +11,12 @@ class Map;
 class IrProximitySensor : public sf::Drawable, public sf::Transformable
 {
 public:
+    //! @param distanceMin: in pixel
     //! @param distanceMax: in pixel
     //! @param position: in pixel
     //! @param orientation: in degree
-    IrProximitySensor(float distanceMax, const sf::Vector2f & position, float orientation,
-            const Map & map);
+    IrProximitySensor(float distanceMin, float distanceMax, const sf::Vector2f & position,
+            float orientation, const Map & map);
 
     inline std::size_t getDistanceDetected() const {return _distanceDetected;}
 
@@ -25,6 +26,7 @@ public:
     void draw(sf::RenderTarget & target, sf::RenderStates states) const override;
 
 private:
+    const float _distanceMin;
     const float _distanceMax;
     const Map & _map;
     std::size_t _distanceDetected;

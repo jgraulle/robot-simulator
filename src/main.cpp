@@ -91,8 +91,8 @@ int main()
     // Build a robot
     Robot robot(sf::Vector2f(20.0, 20.0), map);
     robot.setPosition(window.getView().getSize().x/2.0, 225.0);
-    robot.addIrProximitySensor(IrProximitySensor(150.0, sf::Vector2f(10.0, 10.0), 0.0, map));
-    robot.addIrProximitySensor(IrProximitySensor(150.0, sf::Vector2f(10.0, -10.0), 0.0, map));
+    robot.addIrProximitySensor(IrProximitySensor(10.0, 80.0, sf::Vector2f(10.0, 10.0), 0.0, map));
+    robot.addIrProximitySensor(IrProximitySensor(10.0, 80.0, sf::Vector2f(10.0, -10.0), 0.0, map));
     robot.addLineTrackSensor(LineTrackSensor(sf::Vector2f(5.0, 0.0), map, 128u));
 
     auto lastTime = std::chrono::steady_clock::now();
