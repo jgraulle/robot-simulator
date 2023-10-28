@@ -3,15 +3,17 @@
 
 #include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
+#include <numeric>
+#include <numbers>
 
 
-Robot::Robot(const sf::Vector2f & size, const Map & map)
+Robot::Robot(const sf::Vector2f & size, float wheelsDistance, const Map & map)
     : _size(size)
+    , _wheelsDistance(wheelsDistance)
+    , _motorsSpeed({0.0, 0.0})
     , _shape(std::make_unique<sf::RectangleShape>(size))
     , _sensors()
     , _map(map)
-    , _linearVelocity(0.0)
-    , _angularVelocity(0.0)
     , _collisionDetectors({
             SwitchSensor(sf::Vector2f(size.x/2.0, size.y/2.0), size.x, -90.0, map),
             SwitchSensor(sf::Vector2f(-size.x/2.0, -size.y/2.0), size.x, 90.0, map)})
@@ -24,8 +26,8 @@ void Robot::update(float elapsedTime, const sf::Transform & parentWorldTransform
 {
     // Compute new position and orientation
     sf::Transform orientationTransform(sf::Transform().rotate(getRotation()));
-    // TODO Step1 Replace the stub below to compute linearStep and angularStep from _linearVelocity,
-    // _angularVelocity, orientationTransform and elapsedTime
+    // TODO Step1 Replace the stub below to compute linearStep and angularStep from
+    // getMotorSpeed(RIGHT), getMotorSpeed(LEFT), orientationTransform and elapsedTime
     // Begin stub
     float linearStep = 0.0;
     float angularStep = 0.0;

@@ -9,6 +9,7 @@
 #include <SFML/Graphics.hpp>
 #include <sstream>
 #include <memory>
+#include <algorithm>
 
 
 void event(sf::RenderWindow & window, Robot & robot, bool & isIaEnabled, float & speed)
@@ -27,37 +28,60 @@ void event(sf::RenderWindow & window, Robot & robot, bool & isIaEnabled, float &
             case sf::Keyboard::Escape:
                 window.close();
                 break;
-            case sf::Keyboard::Z:
+            case sf::Keyboard::A:
+                robot.setMotorSpeed(Robot::MotorIndex::LEFT, 0.0);
+                robot.setMotorSpeed(Robot::MotorIndex::RIGHT, speed/4);
+                break;
+            case sf::Keyboard::Left:
+            case sf::Keyboard::Q:
+                robot.setMotorSpeed(Robot::MotorIndex::LEFT, -speed/4);
+                robot.setMotorSpeed(Robot::MotorIndex::RIGHT, speed/4);
+                break;
+            case sf::Keyboard::W:
+                robot.setMotorSpeed(Robot::MotorIndex::LEFT, 0.0);
+                robot.setMotorSpeed(Robot::MotorIndex::RIGHT, -speed/4);
+                break;
             case sf::Keyboard::Up:
-                robot.setLinearVelocity(100.0*speed);
+            case sf::Keyboard::Z:
+                robot.setMotorSpeed(Robot::MotorIndex::LEFT, speed);
+                robot.setMotorSpeed(Robot::MotorIndex::RIGHT, speed);
                 break;
             case sf::Keyboard::S:
+                robot.setMotorSpeed(Robot::MotorIndex::LEFT, 0.0);
+                robot.setMotorSpeed(Robot::MotorIndex::RIGHT, 0.0);
+                break;
             case sf::Keyboard::Down:
-                robot.setLinearVelocity(-100.0*speed);
+            case sf::Keyboard::X:
+                robot.setMotorSpeed(Robot::MotorIndex::LEFT, -speed);
+                robot.setMotorSpeed(Robot::MotorIndex::RIGHT, -speed);
                 break;
-            case sf::Keyboard::Q:
-            case sf::Keyboard::Left:
-                robot.setAngularVelocity(-90.0*speed);
+            case sf::Keyboard::E:
+                robot.setMotorSpeed(Robot::MotorIndex::LEFT, speed/4);
+                robot.setMotorSpeed(Robot::MotorIndex::RIGHT, 0.0);
                 break;
-            case sf::Keyboard::D:
             case sf::Keyboard::Right:
-                robot.setAngularVelocity(90.0*speed);
+            case sf::Keyboard::D:
+                robot.setMotorSpeed(Robot::MotorIndex::LEFT, speed/4);
+                robot.setMotorSpeed(Robot::MotorIndex::RIGHT, -speed/4);
+                break;
+            case sf::Keyboard::C:
+                robot.setMotorSpeed(Robot::MotorIndex::LEFT, -speed/4);
+                robot.setMotorSpeed(Robot::MotorIndex::RIGHT, 0.0);
+                break;
+            case sf::Keyboard::PageUp:
+                speed *= 1.1;
+                robot.setMotorSpeed(Robot::MotorIndex::LEFT, robot.getMotorSpeed(Robot::MotorIndex::LEFT)*1.1);
+                robot.setMotorSpeed(Robot::MotorIndex::RIGHT, robot.getMotorSpeed(Robot::MotorIndex::RIGHT)*1.1);
+                break;
+            case sf::Keyboard::PageDown:
+                speed *= 0.9;
+                robot.setMotorSpeed(Robot::MotorIndex::LEFT, robot.getMotorSpeed(Robot::MotorIndex::LEFT)*0.9);
+                robot.setMotorSpeed(Robot::MotorIndex::RIGHT, robot.getMotorSpeed(Robot::MotorIndex::RIGHT)*0.9);
                 break;
             case sf::Keyboard::I:
             case sf::Keyboard::Space:
                 isIaEnabled = !isIaEnabled;
-                robot.setLinearVelocity(0.0);
-                robot.setAngularVelocity(0.0);
-                break;
-            case sf::Keyboard::PageUp:
-                speed *= 1.1;
-                robot.setLinearVelocity(robot.getLinearVelocity()*1.1);
-                robot.setAngularVelocity(robot.getAngularVelocity()*1.1);
-                break;
-            case sf::Keyboard::PageDown:
-                speed *= 0.9;
-                robot.setLinearVelocity(robot.getLinearVelocity()*0.9);
-                robot.setAngularVelocity(robot.getAngularVelocity()*0.9);
+                robot.setMotorsSpeed({0.0, 0.0});
                 break;
             default:
                 break;
@@ -66,18 +90,12 @@ void event(sf::RenderWindow & window, Robot & robot, bool & isIaEnabled, float &
         case sf::Event::KeyReleased:
             switch (event.key.code)
             {
-            case sf::Keyboard::Z:
             case sf::Keyboard::Up:
-            case sf::Keyboard::S:
             case sf::Keyboard::Down:
-                robot.setLinearVelocity(0.0);
-                break;
-            case sf::Keyboard::Q:
             case sf::Keyboard::Left:
-            case sf::Keyboard::D:
             case sf::Keyboard::Right:
-                robot.setAngularVelocity(0.0);
-                break;
+                robot.setMotorSpeed(Robot::MotorIndex::LEFT, 0.0);
+                robot.setMotorSpeed(Robot::MotorIndex::RIGHT, 0.0);
             default:
                 break;
             }
@@ -104,7 +122,7 @@ int main()
     //window.setFramerateLimit(60);
 
     // Build a robot
-    Robot robot(sf::Vector2f(20.0, 20.0), map);
+    Robot robot(sf::Vector2f(20.0, 20.0), 20.0, map);
     robot.setPosition(window.getView().getSize().x/2.0, 225.0);
     robot.addSensor(std::make_unique<IrProximitySensor>(10.0, 80.0, sf::Vector2f(10.0, 10.0), 0.0, map));
     robot.addSensor(std::make_unique<IrProximitySensor>(10.0, 80.0, sf::Vector2f(10.0, -10.0), 0.0, map));
@@ -128,11 +146,10 @@ int main()
         // Update robot IA
         if (isIaEnabled && lineTrackSensor!=nullptr)
         {
-            robot.setLinearVelocity(40.0);
             if (lineTrackSensor->isDetected())
-                robot.setAngularVelocity(-90.0);
+                robot.setMotorsSpeed({0.5, 1.0});
             else
-                robot.setAngularVelocity(90.0);
+                robot.setMotorsSpeed({1.0, 0.5});
         }
 
         // Compute elapsedTime from last update
