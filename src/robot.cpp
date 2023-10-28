@@ -12,7 +12,9 @@ Robot::Robot(const sf::Vector2f & size, const Map & map)
     , _map(map)
     , _linearVelocity(0.0)
     , _angularVelocity(0.0)
-    , _points()
+    , _collisionDetectors({
+            SwitchSensor(sf::Vector2f(size.x/2.0, size.y/2.0), size.x, -90.0, map),
+            SwitchSensor(sf::Vector2f(-size.x/2.0, -size.y/2.0), size.x, 90.0, map)})
 {
     _shape->setFillColor(sf::Color::Green);
     _shape->setOrigin(size.x/2.0, size.y/2.0);
@@ -62,7 +64,9 @@ void Robot::draw(sf::RenderTarget & target, sf::RenderStates states) const
     for (const auto & sensor : _sensors)
         target.draw(*sensor, states);
 
+#ifdef COLLISION_DEBUG
     // Display collision detection debug
-    states.transform = sf::Transform::Identity;
-    target.draw(_points.data(), _points.size(), sf::Points, states);
+    for (const auto & collisionDetector : _collisionDetectors)
+        collisionDetector.draw(target, states);
+#endif
 }

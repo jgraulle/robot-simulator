@@ -2,6 +2,7 @@
 #include "map.hpp"
 #include "irProximitySensor.hpp"
 #include "lineTrackSensor.hpp"
+#include "switchSensor.hpp"
 
 #include <SFML/Graphics.hpp>
 #include <sstream>
@@ -107,6 +108,8 @@ int main()
     robot.addSensor(std::make_unique<IrProximitySensor>(10.0, 80.0, sf::Vector2f(10.0, -10.0), 0.0, map));
     robot.addSensor(std::make_unique<LineTrackSensor>(sf::Vector2f(5.0, 0.0), map, 128u));
     const LineTrackSensor * lineTrackSensor = dynamic_cast<const LineTrackSensor *>(robot.getSensors().back().get());
+    robot.addSensor(std::make_unique<SwitchSensor>(sf::Vector2f(11.0, -10.0), 3, 90.0, map));
+    robot.addSensor(std::make_unique<SwitchSensor>(sf::Vector2f(11.0, 10.0), 3, -90.0, map));
 
     auto lastTime = std::chrono::steady_clock::now();
     int fpsCount = 0;
