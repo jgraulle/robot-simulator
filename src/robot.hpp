@@ -21,7 +21,7 @@ class Robot : public sf::Drawable, public sf::Transformable
 {
 public:
     //! @param size: in pixel
-    Robot(const sf::Vector2f & size, const Map & wall);
+    Robot(const sf::Vector2f & size, float wheelsDistance, const Map & wall);
 
     inline void addSensor(std::unique_ptr<Sensor> && toAdd)
                 {_sensors.push_back(std::move(toAdd));}
@@ -29,17 +29,21 @@ public:
     inline const auto & getSensors() const
             {return _sensors;}
 
-    //! @return in pixel/seconds
-    inline float getLinearVelocity() const {return _linearVelocity;}
+    enum class MotorIndex {RIGHT = 0, LEFT = 1};
 
-    //! @param v: in pixel/seconds
-    inline void setLinearVelocity(float v) {_linearVelocity = v;}
+    //! @return PWM between -1.0 and 1.0
+    //! \{
+    inline const std::array<float, 2> & getMotorsSpeed() const {return _motorsSpeed;}
+    inline float getMotorSpeed(MotorIndex motorIndex) const
+            {return _motorsSpeed.at(static_cast<std::size_t>(motorIndex));}
+    //! \}
 
-    //! @return in degree/seconds
-    inline float getAngularVelocity() const {return _angularVelocity;}
-
-    //! @param v: in degree/seconds
-    inline void setAngularVelocity(float v) {_angularVelocity = v;}
+    //! @param value: PWM between -1.0 and 1.0
+    //! \{
+    inline void setMotorsSpeed(const std::array<float, 2> & value) {_motorsSpeed = value;}
+    inline void setMotorSpeed(MotorIndex motorIndex, float value)
+            {_motorsSpeed[static_cast<std::size_t>(motorIndex)] = value;}
+    //! \}
 
     //! @param elapsedTime: in seconds
     void update(float elapsedTime, const sf::Transform & parentWorldTransform);
@@ -47,12 +51,13 @@ public:
     void draw(sf::RenderTarget & target, sf::RenderStates states) const override;
 
 private:
-    sf::Vector2f _size;
+    const sf::Vector2f _size;
+    const float _wheelsDistance;
+    std::array<float, 2> _motorsSpeed;
+    float MOTOR_SPEED_MAX = 100.0;
     std::unique_ptr<sf::Shape> _shape;
     std::vector<std::unique_ptr<Sensor>> _sensors;
     const Map & _map;
-    float _linearVelocity;
-    float _angularVelocity;
     std::vector<SwitchSensor> _collisionDetectors;
 };
 
