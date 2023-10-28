@@ -35,12 +35,10 @@ void Robot::update(float elapsedTime)
 {
     // Compute new position and orientation
     sf::Transform orientationTransform(sf::Transform().rotate(getRotation()));
-    // TODO Step1 Replace the stub below to compute linearStep and angularStep from
-    // getMotorSpeed(RIGHT), getMotorSpeed(LEFT), orientationTransform and elapsedTime
-    // Begin stub
-    float linearStep = 0.0;
-    float angularStep = 0.0;
-    // End stub
+    float linearStep = (getMotorSpeed(MotorIndex::LEFT) + getMotorSpeed(MotorIndex::RIGHT))
+            / 2.0 * elapsedTime * MOTOR_SPEED_MAX;
+    float angularStep = (getMotorSpeed(MotorIndex::LEFT) - getMotorSpeed(MotorIndex::RIGHT))
+            / _wheelsDistance * elapsedTime * MOTOR_SPEED_MAX * 180.0 / std::numbers::pi;
     Transformable newTransform;
     newTransform.setPosition(getPosition() + orientationTransform.transformPoint(sf::Vector2f(linearStep, 0.0)));
     newTransform.setRotation(getRotation() + angularStep);
