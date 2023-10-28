@@ -43,11 +43,15 @@ void Robot::update(float elapsedTime)
     newTransform.setPosition(getPosition() + orientationTransform.transformPoint(sf::Vector2f(linearStep, 0.0)));
     newTransform.setRotation(getRotation() + angularStep);
 
-    // TODO Step2 Detect robot collision with Wall and do not move or rotate if collision using _map
-    // and _collisionDetectors
-    // Begin stub
+    // Check collision
     bool isCollision = false;
-    // End stub
+    for (auto & collisionDetector : _collisionDetectors)
+    {
+        collisionDetector.update(elapsedTime, newTransform.getTransform());
+        isCollision |= collisionDetector.isDetected();
+        if (isCollision)
+            break;
+    }
 
     // Move robot if no collision
     if (!isCollision)
