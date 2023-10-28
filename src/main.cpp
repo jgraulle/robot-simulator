@@ -75,20 +75,20 @@ void event(sf::RenderWindow & window, Robot & robot)
 
 int main()
 {
-    Map wall("../data/wall.png");
-    Map road("../data/road.png");
+    Map wallMap("../data/wall.png");
+    Map roadMap("../data/road.png");
 
-    sf::RenderWindow window(sf::VideoMode(800, 600), "robot-simulator",
+    sf::RenderWindow window(sf::VideoMode(wallMap.getSize().x, wallMap.getSize().y), "robot-simulator",
             sf::Style::Titlebar | sf::Style::Close);
     window.setVerticalSyncEnabled(true);
     //window.setFramerateLimit(60);
 
     // Build a robot
-    Robot robot(sf::Vector2f(20.0, 20.0));
+    Robot robot(sf::Vector2f(20.0, 20.0), wallMap);
     robot.setPosition(window.getView().getSize().x/2.0, 225.0);
-    robot.addIrProximitySensor(IrProximitySensor(150.0, sf::Vector2f(10.0, 10.0), wall));
-    robot.addIrProximitySensor(IrProximitySensor(150.0, sf::Vector2f(10.0, -10.0), wall));
-    robot.addLineTrackSensor(LineTrackSensor(sf::Vector2f(5.0, 0.0), road));
+    robot.addIrProximitySensor(IrProximitySensor(150.0, sf::Vector2f(10.0, 10.0), wallMap));
+    robot.addIrProximitySensor(IrProximitySensor(150.0, sf::Vector2f(10.0, -10.0), wallMap));
+    robot.addLineTrackSensor(LineTrackSensor(sf::Vector2f(5.0, 0.0), roadMap));
 
     auto lastTime = std::chrono::steady_clock::now();
     int fpsCount = 0;
@@ -127,8 +127,8 @@ int main()
 
         // Draw map and robot
         window.clear();
-        window.draw(wall);
-        window.draw(road);
+        window.draw(wallMap);
+        window.draw(roadMap);
         window.draw(robot);
         window.display();
     }

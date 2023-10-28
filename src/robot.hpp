@@ -19,7 +19,7 @@ class Robot : public sf::Drawable, public sf::Transformable
 {
 public:
     //! @param size: in pixel
-    Robot(const sf::Vector2f & size);
+    Robot(const sf::Vector2f & size, const Map & wall);
 
     inline void addIrProximitySensor(IrProximitySensor && toAdd)
             {_irProximitySensors.push_back(std::move(toAdd));}
@@ -50,11 +50,14 @@ public:
     void draw(sf::RenderTarget & target, sf::RenderStates states) const override;
 
 private:
+    sf::Vector2f _size;
     std::unique_ptr<sf::Shape> _shape;
-    float _linearVelocity;
-    float _angularVelocity;
     std::vector<IrProximitySensor> _irProximitySensors;
     std::vector<LineTrackSensor> _lineTrackSensors;
+    const Map & _map;
+    float _linearVelocity;
+    float _angularVelocity;
+    std::vector<sf::Vertex> _points;
 };
 
 #endif

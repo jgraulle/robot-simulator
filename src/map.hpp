@@ -17,10 +17,14 @@ namespace sf
 class Map : public sf::Drawable
 {
 public:
+    //! Load a 2d map all black pixel are set to transparent with no collision
     Map(const std::string & mapFilePath);
 
-    inline bool get(std::size_t x, std::size_t y) const {return _table[x][y];}
     inline sf::Vector2u getSize() const {return _texture.getSize();}
+
+    //! @return true if outside of the map or color of this coordonate is not black
+    inline bool getIsCollision(std::size_t x, std::size_t y) const
+            {return x<0.0 || x>=getSize().x || y<0.0 || y>=getSize().y || _table[x][y];}
 
     void draw(sf::RenderTarget & target, sf::RenderStates states) const override;
 
