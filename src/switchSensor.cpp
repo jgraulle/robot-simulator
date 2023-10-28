@@ -20,14 +20,24 @@ void SwitchSensor::update(float, const sf::Transform & parentWorldTransform)
 {
     // Compute world tranform
     auto worldTranform = parentWorldTransform * getTransform();
-    // Detect collision with wall
+    // Compute line begin and end position
     _line[0].position = worldTranform.transformPoint(sf::Vector2f(0.0, 0.0));
-    // TODO Step1 Replace the stub below to compute _isDetected and _line[1].position from
-    // _size, worldTranform and _map
-    // Begin stub
-    _isDetected = false;
     _line[1].position = worldTranform.transformPoint(sf::Vector2f(_size, 0.0));
-    // End stub
+    // Detect collision with wall
+    _isDetected = _map.getIsCollision(_line[0].position.x, _line[0].position.y)
+        || _map.getIsCollision(_line[1].position.x, _line[1].position.y);
+    if (!_isDetected)
+    {
+        for (std::size_t pointIndex = 1u; pointIndex<_size-1; pointIndex++)
+        {
+            auto pos = worldTranform.transformPoint(sf::Vector2f(pointIndex, 0.0));
+            if (_map.getIsCollision(pos.x, pos.y))
+            {
+                _isDetected = true;
+                break;
+            }
+        }
+    }
 
     // Update color
     sf::Color color = _isDetected ? sf::Color::Red : sf::Color::Blue;
