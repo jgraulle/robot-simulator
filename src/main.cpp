@@ -81,7 +81,7 @@ void event(sf::RenderWindow & window, Robot & robot, bool & isIaEnabled)
 
 int main()
 {
-    Map map("../data/map.png", sf::Color::White, sf::Color::Yellow);
+    Map map("../data/map.png", sf::Color::White);
 
     sf::RenderWindow window(sf::VideoMode(map.getSize().x, map.getSize().y), "robot-simulator",
             sf::Style::Titlebar | sf::Style::Close);
@@ -93,7 +93,7 @@ int main()
     robot.setPosition(window.getView().getSize().x/2.0, 225.0);
     robot.addIrProximitySensor(IrProximitySensor(150.0, sf::Vector2f(10.0, 10.0), map));
     robot.addIrProximitySensor(IrProximitySensor(150.0, sf::Vector2f(10.0, -10.0), map));
-    robot.addLineTrackSensor(LineTrackSensor(sf::Vector2f(5.0, 0.0), map));
+    robot.addLineTrackSensor(LineTrackSensor(sf::Vector2f(5.0, 0.0), map, 128u));
 
     auto lastTime = std::chrono::steady_clock::now();
     int fpsCount = 0;
@@ -107,7 +107,7 @@ int main()
         if (isIaEnabled && !robot.getLineTrackSensors().empty())
         {
             robot.setLinearVelocity(40.0);
-            if (robot.getLineTrackSensors()[0].getDetected())
+            if (robot.getLineTrackSensors()[0].isDetected())
                 robot.setAngularVelocity(-90.0);
             else
                 robot.setAngularVelocity(90.0);

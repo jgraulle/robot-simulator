@@ -6,7 +6,7 @@
 
 
 Map::Map(const std::string & mapFilePath, const sf::Color & collisionColor,
-        const sf::Color & lineColor)
+        const std::array<float, 3> & lineTrackColorToGreyWeight)
     : _texture()
     , _collisionTable()
     , _lineTable()
@@ -25,10 +25,13 @@ Map::Map(const std::string & mapFilePath, const sf::Color & collisionColor,
     _shape->setTexture(&_texture);
 
     // Prepare table for collision detection
-    _collisionTable = prepareTableHelper(image, collisionColor);
+    _collisionTable = prepareTableHelper<bool>(image,
+            [collisionColor](const sf::Color & color){return color == collisionColor;});
 
     // Prepare table for line detection
-    _lineTable = prepareTableHelper(image, lineColor);
+    _lineTable = prepareTableHelper<std::uint8_t>(image,
+            [weight = lineTrackColorToGreyWeight](const sf::Color & color)
+            {return color.r*weight[0] + color.g*weight[1] + color.b*weight[2];});
 }
 
 void Map::draw(sf::RenderTarget & target, sf::RenderStates states) const
@@ -36,9 +39,12 @@ void Map::draw(sf::RenderTarget & target, sf::RenderStates states) const
     target.draw(*_shape, states);
 }
 
-Map::Bool2dTable Map::prepareTableHelper(const sf::Image & image, const sf::Color & color)
+
+template <typename Value>
+Map::Table2d<Value> Map::prepareTableHelper(const sf::Image & image,
+        std::function<Value(const sf::Color &)> convert)
 {
-    Bool2dTable table;
+    Map::Table2d<Value> table;
 
     table.reserve(image.getSize().x);
     for (auto x = 0u; x<image.getSize().x; x++)
@@ -47,7 +53,7 @@ Map::Bool2dTable Map::prepareTableHelper(const sf::Image & image, const sf::Colo
         table[x].reserve(image.getSize().y);
         for (auto y = 0u; y<image.getSize().y; y++)
         {
-            table[x].emplace_back(image.getPixel(x, y) == color);
+            table[x].emplace_back(convert(image.getPixel(x, y)));
         }
     }
 

@@ -18,9 +18,10 @@ class LineTrackSensor : public sf::Drawable, public sf::Transformable
 {
 public:
     //! @param position: in pixel
-    LineTrackSensor(const sf::Vector2f & position, const Map & map);
+    LineTrackSensor(const sf::Vector2f & position, const Map & map, std::uint8_t threshold);
 
-    inline bool getDetected() const {return _detected;}
+    inline bool isDetected() const {return _value>=_threshold;}
+    inline std::uint8_t getValue() const {return _value;}
 
     //! @param elapsedTime: in second
     void update(float elapsedTime, const sf::Transform & parentWorldTransform);
@@ -33,7 +34,8 @@ public:
 private:
     const Map & _map;
     std::unique_ptr<sf::Shape> _shape;
-    bool _detected;
+    const std::uint8_t _threshold;
+    std::uint8_t _value;
 };
 
 #endif
