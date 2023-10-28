@@ -15,6 +15,7 @@ add_executable(robotSimulator
     src/irProximitySensor.cpp
     src/map.cpp
     src/lineTrackSensor.cpp
+    src/switchSensor.cpp
 )
 
 target_link_libraries(robotSimulator sfml-graphics sfml-window sfml-system)
@@ -23,3 +24,5 @@ target_compile_options(robotSimulator PRIVATE
   "$<${gcc_like_cxx}:-Wall;-Wextra;-Wshadow;-Wformat=2;-Wunused>"
   "$<${msvc_cxx}:-W3>"
 )
+
+#add_compile_definitions(COLLISION_DEBUG)

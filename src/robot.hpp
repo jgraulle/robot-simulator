@@ -3,6 +3,7 @@
 
 #include "map.hpp"
 #include "sensor.hpp"
+#include "switchSensor.hpp"
 
 #include <SFML/Graphics/Drawable.hpp>
 #include <SFML/Graphics/Transformable.hpp>
@@ -52,7 +53,7 @@ private:
     const Map & _map;
     float _linearVelocity;
     float _angularVelocity;
-    std::vector<sf::Vertex> _points;
+    std::vector<SwitchSensor> _collisionDetectors;
 };
 
 #endif
