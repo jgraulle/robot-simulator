@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <functional>
 
 namespace sf
 {
@@ -19,7 +20,7 @@ class Map : public sf::Drawable
 public:
     //! Load a 2d map
     Map(const std::string & mapFilePath, const sf::Color & collisionColor,
-            const sf::Color & lineColor);
+            const std::array<float, 3> & lineTrackColorToGreyWeight = {0.2126, 0.7152, 0.0722});
 
     inline sf::Vector2u getSize() const {return _texture.getSize();}
 
@@ -28,19 +29,23 @@ public:
             {return x<0.0 || x>=getSize().x || y<0.0 || y>=getSize().y || _collisionTable[x][y];}
 
     //! @return true if outside of the map or color of this coordonate is collisionColor
-    inline bool getIsLine(std::size_t x, std::size_t y) const
-            {return x<0.0 || x>=getSize().x || y<0.0 || y>=getSize().y || _lineTable[x][y];}
+    inline std::uint8_t getLineValue(std::size_t x, std::size_t y) const {
+        if (x<0.0 || x>=getSize().x || y<0.0 || y>=getSize().y) return 0u;
+        return _lineTable[x][y];
+    }
 
     void draw(sf::RenderTarget & target, sf::RenderStates states) const override;
 
 private:
-    using Bool2dTable = std::vector<std::vector<bool>>;
-
-    Bool2dTable prepareTableHelper(const sf::Image & image, const sf::Color & color);
+    template <typename Value>
+    using Table2d = std::vector<std::vector<Value>>;
+    template <typename Value>
+    Table2d<Value> prepareTableHelper(const sf::Image & image,
+            std::function<Value(const sf::Color &)> convert);
 
     sf::Texture _texture;
-    Bool2dTable _collisionTable;
-    Bool2dTable _lineTable;
+    Table2d<bool> _collisionTable;
+    Table2d<std::uint8_t> _lineTable;
     std::unique_ptr<sf::Shape> _shape;
 };
 
