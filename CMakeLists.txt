@@ -9,6 +9,26 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(gcc_like_cxx "$<COMPILE_LANG_AND_ID:CXX,ARMClang,AppleClang,Clang,GNU,LCC>")
 set(msvc_cxx "$<COMPILE_LANG_AND_ID:CXX,MSVC>")
 
+include(ExternalProject)
+ExternalProject_Add(Jsoncpp
+    GIT_REPOSITORY git@github.com:open-source-parsers/jsoncpp.git
+    GIT_TAG 1.9.5
+    CMAKE_ARGS -DJSONCPP_WITH_TESTS=OFF -DJSONCPP_WITH_POST_BUILD_UNITTEST=OFF
+        -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}
+)
+
+ExternalProject_Add(libjson-rpc-cpp
+    GIT_REPOSITORY git@github.com:cinemast/libjson-rpc-cpp.git
+    GIT_TAG v1.4.1
+    CMAKE_ARGS -DTCP_SOCKET_SERVER=YES -DTCP_SOCKET_CLIENT=YES -DHTTP_SERVER=NO
+        -DHTTP_CLIENT=NO -DREDIS_SERVER=NO -DREDIS_CLIENT=NO -DCOMPILE_TESTS=NO
+        -DCOMPILE_STUBGEN=NO -DCOMPILE_EXAMPLES=NO -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}
+)
+ExternalProject_Add_StepDependencies(libjson-rpc-cpp build Jsoncpp)
+
+link_directories(${CMAKE_BINARY_DIR}/lib)
+include_directories(${CMAKE_BINARY_DIR}/include)
+
 add_executable(robotSimulator
     src/main.cpp
     src/robot.cpp
@@ -21,7 +41,9 @@ add_executable(robotSimulator
     src/robotCommand.cpp
 )
 
-target_link_libraries(robotSimulator sfml-graphics sfml-window sfml-system)
+target_link_libraries(robotSimulator jsonrpccpp-common jsonrpccpp-server jsoncpp sfml-graphics
+    sfml-window sfml-system)
+add_dependencies(robotSimulator Jsoncpp libjson-rpc-cpp)
 
 target_compile_options(robotSimulator PRIVATE
   "$<${gcc_like_cxx}:-Wall;-Wextra;-Wshadow;-Wformat=2;-Wunused>"

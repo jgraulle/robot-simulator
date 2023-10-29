@@ -22,7 +22,16 @@ Robot::Robot(const sf::Vector2f & size, float wheelsDistance, const Map & map)
     _shape->setOrigin(size.x/2.0, size.y/2.0);
 }
 
-void Robot::update(float elapsedTime, const sf::Transform & parentWorldTransform)
+Robot::MotorIndex Robot::motorIndexFromString(const std::string & str)
+{
+    if (str == "RIGHT")
+        return MotorIndex::RIGHT;
+    if (str == "LEFT")
+        return MotorIndex::LEFT;
+    throw std::invalid_argument(std::string("Cannot convert ") + str + " into Robot::MotorIndex");
+}
+
+void Robot::update(float elapsedTime)
 {
     // Compute new position and orientation
     sf::Transform orientationTransform(sf::Transform().rotate(getRotation()));
@@ -50,9 +59,8 @@ void Robot::update(float elapsedTime, const sf::Transform & parentWorldTransform
     }
 
     // Update sensors
-    auto wolrdTransform = parentWorldTransform*getTransform();
     for (auto & sensor : _sensors)
-        sensor->update(elapsedTime, wolrdTransform);
+        sensor->update(elapsedTime, getTransform());
 }
 
 void Robot::draw(sf::RenderTarget & target, sf::RenderStates states) const
