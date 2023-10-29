@@ -6,10 +6,26 @@
 #include "ultrasonicSensor.hpp"
 #include "speedSensor.hpp"
 
+#include <iostream>
+#include <jsonrpccpp/server/connectors/tcpsocketserver.h>
 
-RobotCommand::RobotCommand(Robot & robot)
-    : _robot(robot), _isLineTrackEnabled(false), _speed(1.0)
+RobotCommand::RobotCommand(Robot & robot, jsonrpc::TcpSocketServer & tcpServer)
+    : AbstractServer<RobotCommand>(tcpServer)
+    , _robot(robot), _speed(1.0)
 {
+    bindAndAddMethod(jsonrpc::Procedure("isLineTrackDetected", jsonrpc::PARAMS_BY_NAME,
+            jsonrpc::JSON_BOOLEAN,
+            "index", jsonrpc::JSON_INTEGER,
+            NULL), &RobotCommand::isLineTrackDetected);
+    bindAndAddNotification(jsonrpc::Procedure("setMotorSpeed", jsonrpc::PARAMS_BY_NAME,
+            "motorIndex", jsonrpc::JSON_STRING,
+            "value", jsonrpc::JSON_REAL,
+            NULL), &RobotCommand::setMotorSpeed);
+    bindAndAddNotification(jsonrpc::Procedure("setMotorsSpeed", jsonrpc::PARAMS_BY_NAME,
+            "rightValue", jsonrpc::JSON_REAL,
+            "leftValue", jsonrpc::JSON_REAL,
+            NULL), &RobotCommand::setMotorsSpeed);
+
     for (auto & sensor : _robot.getSensors())
     {
         LineTrackSensor * lineTrackSensor = dynamic_cast<LineTrackSensor *>(sensor.get());
@@ -34,19 +50,17 @@ RobotCommand::~RobotCommand()
 {
 }
 
-void RobotCommand::update()
+void RobotCommand::update(float elapsedTime)
 {
-    if (_isLineTrackEnabled && !_lineTrackSensors.empty())
-    {
-        if (_lineTrackSensors.at(0)->isDetected())
-            _robot.setMotorsSpeed({0.5, 1.0});
-        else
-            _robot.setMotorsSpeed({1.0, 0.5});
-    }
+    const std::lock_guard<std::mutex> lock(_mutex);
+
+    _robot.update(elapsedTime);
 }
 
 void RobotCommand::keyEvent(sf::Event::EventType eventType, sf::Keyboard::Key keyboardCode)
 {
+    const std::lock_guard<std::mutex> lock(_mutex);
+
     switch(eventType)
     {
     case sf::Event::KeyPressed:
@@ -102,11 +116,6 @@ void RobotCommand::keyEvent(sf::Event::EventType eventType, sf::Keyboard::Key ke
             _robot.setMotorSpeed(Robot::MotorIndex::LEFT, _robot.getMotorSpeed(Robot::MotorIndex::LEFT)*0.9);
             _robot.setMotorSpeed(Robot::MotorIndex::RIGHT, _robot.getMotorSpeed(Robot::MotorIndex::RIGHT)*0.9);
             break;
-        case sf::Keyboard::I:
-        case sf::Keyboard::Space:
-            _isLineTrackEnabled = !_isLineTrackEnabled;
-            _robot.setMotorsSpeed({0.0, 0.0});
-            break;
         default:
             break;
         }
@@ -127,4 +136,23 @@ void RobotCommand::keyEvent(sf::Event::EventType eventType, sf::Keyboard::Key ke
     default:
         break;
     }
+}
+
+void RobotCommand::isLineTrackDetected(const Json::Value & request, Json::Value & response)
+{
+    const std::lock_guard<std::mutex> lock(_mutex);
+    response = _lineTrackSensors.at(request["index"].asInt())->isDetected();
+}
+
+void RobotCommand::setMotorSpeed(const Json::Value & request)
+{
+    const std::lock_guard<std::mutex> lock(_mutex);
+    _robot.setMotorSpeed(Robot::motorIndexFromString(request["motorIndex"].asString()),
+            request["value"].asFloat());
+}
+
+void RobotCommand::setMotorsSpeed(const Json::Value & request)
+{
+    const std::lock_guard<std::mutex> lock(_mutex);
+    _robot.setMotorsSpeed(request["rightValue"].asFloat(), request["leftValue"].asFloat());
 }

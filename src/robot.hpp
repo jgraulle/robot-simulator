@@ -30,6 +30,7 @@ public:
             {return _sensors;}
 
     enum class MotorIndex {RIGHT = 0, LEFT = 1};
+    static MotorIndex motorIndexFromString(const std::string & str);
 
     //! @return PWM between -1.0 and 1.0
     //! \{
@@ -40,13 +41,13 @@ public:
 
     //! @param value: PWM between -1.0 and 1.0
     //! \{
-    inline void setMotorsSpeed(const std::array<float, 2> & value) {_motorsSpeed = value;}
+    inline void setMotorsSpeed(float rightValue, float leftValue) {_motorsSpeed = {rightValue, leftValue};}
     inline void setMotorSpeed(MotorIndex motorIndex, float value)
             {_motorsSpeed[static_cast<std::size_t>(motorIndex)] = value;}
     //! \}
 
     //! @param elapsedTime: in seconds
-    void update(float elapsedTime, const sf::Transform & parentWorldTransform);
+    void update(float elapsedTime);
 
     void draw(sf::RenderTarget & target, sf::RenderStates states) const override;
 

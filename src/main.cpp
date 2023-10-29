@@ -11,6 +11,8 @@
 #include <sstream>
 #include <memory>
 #include <algorithm>
+#include <jsonrpccpp/server/connectors/tcpsocketserver.h>
+#include <iostream>
 
 
 void event(sf::RenderWindow & window, RobotCommand & robotCommand)
@@ -46,8 +48,17 @@ void event(sf::RenderWindow & window, RobotCommand & robotCommand)
     }
 }
 
-int main()
+int main(int argc, char** argv)
 {
+    // Parse args for TCP server port
+    uint16_t tcpPort = 6543;
+    if (argc == 2)
+    {
+        std::istringstream iss(argv[2]);
+        iss.exceptions(std::istringstream::failbit);
+        iss >> tcpPort;
+    }
+
     Map map("../data/map.png", sf::Color::White);
 
     sf::RenderWindow window(sf::VideoMode(map.getSize().x, map.getSize().y), "robot-simulator",
@@ -66,7 +77,14 @@ int main()
     robot.addSensor(std::make_unique<UltrasonicSensor>(10.0, 400.0, 30.0, sf::Vector2f(10.0, 0.0), 0.0, map));
     robot.addSensor(std::make_unique<SpeedSensor>(sf::Vector2f(0.0, 5.0), 6.5, 20u));
     robot.addSensor(std::make_unique<SpeedSensor>(sf::Vector2f(0.0, -5.0), 6.5, 20u));
-    RobotCommand robotCommand(robot);
+    jsonrpc::TcpSocketServer tcpServer("0.0.0.0", tcpPort);
+    RobotCommand robotCommand(robot, tcpServer);
+    std::cout << "Listen on TCP port " << tcpPort << std::endl;
+    if(!robotCommand.StartListening())
+    {
+        std::cerr << "Error starting JSON-RCP server on port " << tcpPort << std::endl;
+        exit(1);
+    }
 
     auto lastTime = std::chrono::steady_clock::now();
     int fpsCount = 0;
@@ -75,9 +93,6 @@ int main()
     {
         // Update from sf event
         event(window, robotCommand);
-
-        // Update robot command
-        robotCommand.update();
 
         // Compute elapsedTime from last update
         auto currentTime = std::chrono::steady_clock::now();
@@ -95,7 +110,7 @@ int main()
         }
 
         // Update robot
-        robot.update(elapsedTime, sf::Transform::Identity);
+        robotCommand.update(elapsedTime);
 
         // Draw map and robot
         window.clear();
@@ -103,6 +118,8 @@ int main()
         window.draw(robot);
         window.display();
     }
+
+    robotCommand.StopListening();
 
     return 0;
 }
