@@ -18,10 +18,13 @@ SpeedSensor::SpeedSensor(const sf::Vector2f & position, float wheelDiameter,
 void SpeedSensor::update(float, const sf::Transform & parentWorldTransform)
 {
     auto newPosition = parentWorldTransform.transformPoint(_position);
-    // TODO Step1 Replace the stub below to compute _distance and _value from
-    // _lastGlobalPosition, newPosition and _latticeStep
-    // Begin stub
-    _distance += 0.0;
-    _value += 0u;
-    // End stub
+    sf::Vector2f vector(_lastGlobalPosition.x-newPosition.x, _lastGlobalPosition.y-newPosition.y);
+    _lastGlobalPosition = newPosition;
+    float distance = std::sqrt(vector.x*vector.x+vector.y*vector.y);
+    _distance += distance;
+    while (_distance>_latticeStep)
+    {
+        _distance-=_latticeStep;
+        _value++;
+    }
 }
