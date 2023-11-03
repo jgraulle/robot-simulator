@@ -7,6 +7,7 @@
 #include <SFML/Graphics/Transformable.hpp>
 
 #include <memory>
+#include <cstdint>
 
 class Map;
 
