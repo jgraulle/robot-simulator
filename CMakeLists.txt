@@ -14,7 +14,7 @@ ExternalProject_Add(Jsoncpp
     GIT_REPOSITORY https://github.com/open-source-parsers/jsoncpp.git
     GIT_TAG 1.9.5
     CMAKE_ARGS -DJSONCPP_WITH_TESTS=OFF -DJSONCPP_WITH_POST_BUILD_UNITTEST=OFF
-        -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}
+        -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR} -DBUILD_SHARED_LIBS=OFF
 )
 
 ExternalProject_Add(libjson-rpc-cpp
@@ -23,6 +23,7 @@ ExternalProject_Add(libjson-rpc-cpp
     CMAKE_ARGS -DTCP_SOCKET_SERVER=YES -DTCP_SOCKET_CLIENT=YES -DHTTP_SERVER=NO
         -DHTTP_CLIENT=NO -DREDIS_SERVER=NO -DREDIS_CLIENT=NO -DCOMPILE_TESTS=NO
         -DCOMPILE_STUBGEN=NO -DCOMPILE_EXAMPLES=NO -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}
+        -DBUILD_SHARED_LIBS=OFF -DBUILD_STATIC_LIBS=ON -DWITH_COVERAGE=OFF
 )
 ExternalProject_Add_StepDependencies(libjson-rpc-cpp build Jsoncpp)
 
@@ -41,8 +42,11 @@ add_executable(robotSimulator
     src/robotCommand.cpp
 )
 
-target_link_libraries(robotSimulator jsonrpccpp-common jsonrpccpp-server jsoncpp sfml-graphics
+target_link_libraries(robotSimulator jsonrpccpp-server jsonrpccpp-common jsoncpp sfml-graphics
     sfml-window sfml-system)
+if (WIN32)
+    target_link_libraries(robotSimulator ws2_32)
+endif ()
 add_dependencies(robotSimulator Jsoncpp libjson-rpc-cpp)
 
 target_compile_options(robotSimulator PRIVATE
