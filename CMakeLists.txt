@@ -11,14 +11,14 @@ set(msvc_cxx "$<COMPILE_LANG_AND_ID:CXX,MSVC>")
 
 include(ExternalProject)
 ExternalProject_Add(Jsoncpp
-    GIT_REPOSITORY git@github.com:open-source-parsers/jsoncpp.git
+    GIT_REPOSITORY https://github.com/open-source-parsers/jsoncpp.git
     GIT_TAG 1.9.5
     CMAKE_ARGS -DJSONCPP_WITH_TESTS=OFF -DJSONCPP_WITH_POST_BUILD_UNITTEST=OFF
         -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}
 )
 
 ExternalProject_Add(libjson-rpc-cpp
-    GIT_REPOSITORY git@github.com:cinemast/libjson-rpc-cpp.git
+    GIT_REPOSITORY https://github.com/cinemast/libjson-rpc-cpp.git
     GIT_TAG v1.4.1
     CMAKE_ARGS -DTCP_SOCKET_SERVER=YES -DTCP_SOCKET_CLIENT=YES -DHTTP_SERVER=NO
         -DHTTP_CLIENT=NO -DREDIS_SERVER=NO -DREDIS_CLIENT=NO -DCOMPILE_TESTS=NO
