@@ -7,24 +7,26 @@
 #include "speedSensor.hpp"
 
 #include <iostream>
-#include <jsonrpccpp/server/connectors/tcpsocketserver.h>
+#include <json/value.h>
 
-RobotCommand::RobotCommand(Robot & robot, jsonrpc::TcpSocketServer & tcpServer)
-    : AbstractServer<RobotCommand>(tcpServer)
+
+RobotCommand::RobotCommand(Robot & robot, uint16_t tcpPort)
+    : JsonRpcTcpServer(tcpPort)
     , _robot(robot), _speed(1.0)
 {
-    bindAndAddMethod(jsonrpc::Procedure("isLineTrackDetected", jsonrpc::PARAMS_BY_NAME,
-            jsonrpc::JSON_BOOLEAN,
-            "index", jsonrpc::JSON_INTEGER,
-            NULL), &RobotCommand::isLineTrackDetected);
-    bindAndAddNotification(jsonrpc::Procedure("setMotorSpeed", jsonrpc::PARAMS_BY_NAME,
-            "motorIndex", jsonrpc::JSON_STRING,
-            "value", jsonrpc::JSON_REAL,
-            NULL), &RobotCommand::setMotorSpeed);
-    bindAndAddNotification(jsonrpc::Procedure("setMotorsSpeed", jsonrpc::PARAMS_BY_NAME,
-            "rightValue", jsonrpc::JSON_REAL,
-            "leftValue", jsonrpc::JSON_REAL,
-            NULL), &RobotCommand::setMotorsSpeed);
+    bindMethod("isLineTrackDetected", [this](const Json::Value & params){
+        const std::lock_guard<std::mutex> lock(_mutex);
+        return Json::Value(_lineTrackSensors.at(params["index"].asInt())->isDetected());
+    });
+    bindNotification("setMotorSpeed", [this](const Json::Value & params){
+        const std::lock_guard<std::mutex> lock(_mutex);
+        _robot.setMotorSpeed(Robot::motorIndexFromString(params["motorIndex"].asString()),
+                params["value"].asFloat());
+    });
+    bindNotification("setMotorsSpeed", [this](const Json::Value & params){
+        const std::lock_guard<std::mutex> lock(_mutex);
+        _robot.setMotorsSpeed(params["rightValue"].asFloat(), params["leftValue"].asFloat());
+    });
 
     for (auto & sensor : _robot.getSensors())
     {
@@ -136,23 +138,4 @@ void RobotCommand::keyEvent(sf::Event::EventType eventType, sf::Keyboard::Key ke
     default:
         break;
     }
-}
-
-void RobotCommand::isLineTrackDetected(const Json::Value & request, Json::Value & response)
-{
-    const std::lock_guard<std::mutex> lock(_mutex);
-    response = _lineTrackSensors.at(request["index"].asInt())->isDetected();
-}
-
-void RobotCommand::setMotorSpeed(const Json::Value & request)
-{
-    const std::lock_guard<std::mutex> lock(_mutex);
-    _robot.setMotorSpeed(Robot::motorIndexFromString(request["motorIndex"].asString()),
-            request["value"].asFloat());
-}
-
-void RobotCommand::setMotorsSpeed(const Json::Value & request)
-{
-    const std::lock_guard<std::mutex> lock(_mutex);
-    _robot.setMotorsSpeed(request["rightValue"].asFloat(), request["leftValue"].asFloat());
 }

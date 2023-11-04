@@ -18,16 +18,13 @@ Setup
     - g++ --version
     - gdb --version
     - from https://cmake.org/download/ dowload and install cmake-3.28.0-rc3-windows-x86_64.msi, with Add CMake to the PATH for all users
-    - from msys console execute `pacman -S mingw-w64-ucrt-x86_64-sfml` and `pacman -S patch`
+    - from msys console execute `pacman -S mingw-w64-ucrt-x86_64-sfml` and `pacman -S mingw-w64-ucrt-x86_64-asio`
 - from https://gitlab.cri.epita.fr/jeremie.graulle/ssie-s9-robot-simulator create a personal fork
 to be able to commit
 - clone your fork on your computer:
 `git clone git@gitlab.cri.epita.fr:<name>/ssie-s9-robot-simulator.git`
 - open VS code from this fork: code . &
 - In menu "View" option "Extensions", search and install the extension `C/C++ Extension Pack`
-- For Windows only:
-    - From VS code run a first build (with cmake), with an predictable failed build
-    - from msys console goto build/libjson-rpc-cpp-prefix/src/libjson-rpc-cpp and run `patch -p1 -i ../../../../win.patch`
 - Build and Run
 
 Step1

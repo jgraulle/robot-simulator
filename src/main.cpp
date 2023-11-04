@@ -11,7 +11,6 @@
 #include <sstream>
 #include <memory>
 #include <algorithm>
-#include <jsonrpccpp/server/connectors/tcpsocketserver.h>
 #include <iostream>
 
 
@@ -77,14 +76,8 @@ int main(int argc, char** argv)
     robot.addSensor(std::make_unique<UltrasonicSensor>(10.0, 400.0, 30.0, sf::Vector2f(10.0, 0.0), 0.0, map));
     robot.addSensor(std::make_unique<SpeedSensor>(sf::Vector2f(0.0, 5.0), 6.5, 20u));
     robot.addSensor(std::make_unique<SpeedSensor>(sf::Vector2f(0.0, -5.0), 6.5, 20u));
-    jsonrpc::TcpSocketServer tcpServer("0.0.0.0", tcpPort);
-    RobotCommand robotCommand(robot, tcpServer);
-    std::cout << "Listen on TCP port " << tcpPort << std::endl;
-    if(!robotCommand.StartListening())
-    {
-        std::cerr << "Error starting JSON-RCP server on port " << tcpPort << std::endl;
-        exit(1);
-    }
+    RobotCommand robotCommand(robot, tcpPort);
+    robotCommand.startListening();
 
     auto lastTime = std::chrono::steady_clock::now();
     int fpsCount = 0;
@@ -119,7 +112,7 @@ int main(int argc, char** argv)
         window.display();
     }
 
-    robotCommand.StopListening();
+    robotCommand.stopListening();
 
     return 0;
 }

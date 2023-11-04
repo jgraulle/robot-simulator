@@ -1,10 +1,10 @@
 #ifndef ROBOT_COMMAND_HPP
 #define ROBOT_COMMAND_HPP
 
-#include "SFML/Window/Event.hpp"
+#include "jsonrpctcpserver.hpp"
 
 #include <vector>
-#include <jsonrpccpp/server/abstractserver.h>
+#include <SFML/Window/Event.hpp>
 #include <mutex>
 
 class Robot;
@@ -13,16 +13,12 @@ class LineTrackSensor;
 class SwitchSensor;
 class UltrasonicSensor;
 class SpeedSensor;
-namespace jsonrpc
-{
-    class TcpSocketServer;
-}
 
 
-class RobotCommand : public jsonrpc::AbstractServer<RobotCommand>
+class RobotCommand : public JsonRpcTcpServer
 {
 public:
-    RobotCommand(Robot & robot, jsonrpc::TcpSocketServer & tcpServer);
+    RobotCommand(Robot & robot, uint16_t tcpPort);
     virtual ~RobotCommand();
 
     //! @param elapsedTime: in seconds
@@ -31,10 +27,6 @@ public:
     void keyEvent(sf::Event::EventType eventType, sf::Keyboard::Key keyboardCode);
 
 private:
-    void isLineTrackDetected(const Json::Value & request, Json::Value & response);
-    void setMotorSpeed(const Json::Value & request);
-    void setMotorsSpeed(const Json::Value & request);
-
     Robot & _robot;
     float _speed;
     std::vector<IrProximitySensor*> _irProximitySensors;
