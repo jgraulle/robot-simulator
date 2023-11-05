@@ -12,27 +12,15 @@
 
 RobotCommand::RobotCommand(Robot & robot, uint16_t tcpPort)
     : JsonRpcTcpServer(tcpPort)
-    , _robot(robot), _speed(1.0)
+    , _robot(robot)
+    , _keyboardSpeed(1.0)
+    , _lineTrackSensorNotifiers(this)
 {
-    bindMethod("isLineTrackDetected", [this](const Json::Value & params){
-        const std::lock_guard<std::mutex> lock(_mutex);
-        return Json::Value(_lineTrackSensors.at(params["index"].asInt())->isDetected());
-    });
-    bindNotification("setMotorSpeed", [this](const Json::Value & params){
-        const std::lock_guard<std::mutex> lock(_mutex);
-        _robot.setMotorSpeed(Robot::motorIndexFromString(params["motorIndex"].asString()),
-                params["value"].asFloat());
-    });
-    bindNotification("setMotorsSpeed", [this](const Json::Value & params){
-        const std::lock_guard<std::mutex> lock(_mutex);
-        _robot.setMotorsSpeed(params["rightValue"].asFloat(), params["leftValue"].asFloat());
-    });
-
     for (auto & sensor : _robot.getSensors())
     {
         LineTrackSensor * lineTrackSensor = dynamic_cast<LineTrackSensor *>(sensor.get());
         if (lineTrackSensor != nullptr)
-            _lineTrackSensors.push_back(lineTrackSensor);
+            _lineTrackSensorNotifiers.add(lineTrackSensor);
         IrProximitySensor * irProximitySensor = dynamic_cast<IrProximitySensor *>(sensor.get());
         if (irProximitySensor != nullptr)
             _irProximitySensors.push_back(irProximitySensor);
@@ -46,6 +34,17 @@ RobotCommand::RobotCommand(Robot & robot, uint16_t tcpPort)
         if (speedSensor != nullptr)
             _speedSensors.push_back(speedSensor);
     }
+
+    _lineTrackSensorNotifiers.bind();
+    bindNotification("setMotorSpeed", [this](const Json::Value & params){
+        const std::lock_guard<std::mutex> lock(_mutex);
+        _robot.setMotorSpeed(Robot::motorIndexFromString(params["motorIndex"].asString()),
+                params["value"].asFloat());
+    });
+    bindNotification("setMotorsSpeed", [this](const Json::Value & params){
+        const std::lock_guard<std::mutex> lock(_mutex);
+        _robot.setMotorsSpeed(params["rightValue"].asFloat(), params["leftValue"].asFloat());
+    });
 }
 
 RobotCommand::~RobotCommand()
@@ -56,7 +55,10 @@ void RobotCommand::update(float elapsedTime)
 {
     const std::lock_guard<std::mutex> lock(_mutex);
 
+    std::vector<bool> isLineTrackDetectedOld;
     _robot.update(elapsedTime);
+
+    _lineTrackSensorNotifiers.notifyChanged();
 }
 
 void RobotCommand::keyEvent(sf::Event::EventType eventType, sf::Keyboard::Key keyboardCode)
@@ -70,21 +72,21 @@ void RobotCommand::keyEvent(sf::Event::EventType eventType, sf::Keyboard::Key ke
         {
         case sf::Keyboard::A:
             _robot.setMotorSpeed(Robot::MotorIndex::LEFT, 0.0);
-            _robot.setMotorSpeed(Robot::MotorIndex::RIGHT, _speed/4);
+            _robot.setMotorSpeed(Robot::MotorIndex::RIGHT, _keyboardSpeed/4);
             break;
         case sf::Keyboard::Left:
         case sf::Keyboard::Q:
-            _robot.setMotorSpeed(Robot::MotorIndex::LEFT, -_speed/4);
-            _robot.setMotorSpeed(Robot::MotorIndex::RIGHT, _speed/4);
+            _robot.setMotorSpeed(Robot::MotorIndex::LEFT, -_keyboardSpeed/4);
+            _robot.setMotorSpeed(Robot::MotorIndex::RIGHT, _keyboardSpeed/4);
             break;
         case sf::Keyboard::W:
             _robot.setMotorSpeed(Robot::MotorIndex::LEFT, 0.0);
-            _robot.setMotorSpeed(Robot::MotorIndex::RIGHT, -_speed/4);
+            _robot.setMotorSpeed(Robot::MotorIndex::RIGHT, -_keyboardSpeed/4);
             break;
         case sf::Keyboard::Up:
         case sf::Keyboard::Z:
-            _robot.setMotorSpeed(Robot::MotorIndex::LEFT, _speed);
-            _robot.setMotorSpeed(Robot::MotorIndex::RIGHT, _speed);
+            _robot.setMotorSpeed(Robot::MotorIndex::LEFT, _keyboardSpeed);
+            _robot.setMotorSpeed(Robot::MotorIndex::RIGHT, _keyboardSpeed);
             break;
         case sf::Keyboard::S:
             _robot.setMotorSpeed(Robot::MotorIndex::LEFT, 0.0);
@@ -92,29 +94,29 @@ void RobotCommand::keyEvent(sf::Event::EventType eventType, sf::Keyboard::Key ke
             break;
         case sf::Keyboard::Down:
         case sf::Keyboard::X:
-            _robot.setMotorSpeed(Robot::MotorIndex::LEFT, -_speed);
-            _robot.setMotorSpeed(Robot::MotorIndex::RIGHT, -_speed);
+            _robot.setMotorSpeed(Robot::MotorIndex::LEFT, -_keyboardSpeed);
+            _robot.setMotorSpeed(Robot::MotorIndex::RIGHT, -_keyboardSpeed);
             break;
         case sf::Keyboard::E:
-            _robot.setMotorSpeed(Robot::MotorIndex::LEFT, _speed/4);
+            _robot.setMotorSpeed(Robot::MotorIndex::LEFT, _keyboardSpeed/4);
             _robot.setMotorSpeed(Robot::MotorIndex::RIGHT, 0.0);
             break;
         case sf::Keyboard::Right:
         case sf::Keyboard::D:
-            _robot.setMotorSpeed(Robot::MotorIndex::LEFT, _speed/4);
-            _robot.setMotorSpeed(Robot::MotorIndex::RIGHT, -_speed/4);
+            _robot.setMotorSpeed(Robot::MotorIndex::LEFT, _keyboardSpeed/4);
+            _robot.setMotorSpeed(Robot::MotorIndex::RIGHT, -_keyboardSpeed/4);
             break;
         case sf::Keyboard::C:
-            _robot.setMotorSpeed(Robot::MotorIndex::LEFT, -_speed/4);
+            _robot.setMotorSpeed(Robot::MotorIndex::LEFT, -_keyboardSpeed/4);
             _robot.setMotorSpeed(Robot::MotorIndex::RIGHT, 0.0);
             break;
         case sf::Keyboard::PageUp:
-            _speed *= 1.1;
+            _keyboardSpeed *= 1.1;
             _robot.setMotorSpeed(Robot::MotorIndex::LEFT, _robot.getMotorSpeed(Robot::MotorIndex::LEFT)*1.1);
             _robot.setMotorSpeed(Robot::MotorIndex::RIGHT, _robot.getMotorSpeed(Robot::MotorIndex::RIGHT)*1.1);
             break;
         case sf::Keyboard::PageDown:
-            _speed *= 0.9;
+            _keyboardSpeed *= 0.9;
             _robot.setMotorSpeed(Robot::MotorIndex::LEFT, _robot.getMotorSpeed(Robot::MotorIndex::LEFT)*0.9);
             _robot.setMotorSpeed(Robot::MotorIndex::RIGHT, _robot.getMotorSpeed(Robot::MotorIndex::RIGHT)*0.9);
             break;

@@ -5,12 +5,12 @@
 #include <asio/streambuf.hpp>
 #include <asio/io_context.hpp>
 #include <functional>
+#include <set>
 #include <map>
 
 namespace Json
 {
     class Value;
-    class StreamWriter;
 }
 
 
@@ -23,15 +23,17 @@ public:
     void startListening();
     void stopListening();
 
-protected:
+    void sendNotification(const std::string & methodName, const Json::Value & params);
+
     using Method = std::function<Json::Value(Json::Value)>;
-    using Notification = std::function<void(Json::Value)>;
     void bindMethod(const std::string & methodName, const Method & method);
+
+    using Notification = std::function<void(Json::Value)>;
     void bindNotification(const std::string & notificationName, const Notification & notification);
 
 private:
     void listen();
-    void session(asio::ip::tcp::socket sock);
+    void session(std::unique_ptr<asio::ip::tcp::socket> socket);
 
     asio::io_context _ioc;
     unsigned short _tcpPort;
@@ -39,6 +41,8 @@ private:
     std::mutex _methodsMutex;
     std::map<std::string, Notification> _notifications;
     std::mutex _notificationsMutex;
+    std::set<asio::ip::tcp::socket *> _clientSockets;
+    std::mutex _clientSocketsMutex;
 };
 
 #endif

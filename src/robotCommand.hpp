@@ -2,6 +2,7 @@
 #define ROBOT_COMMAND_HPP
 
 #include "jsonrpctcpserver.hpp"
+#include "notifier/lineTrackSensorsNotifier.hpp"
 
 #include <vector>
 #include <SFML/Window/Event.hpp>
@@ -28,9 +29,9 @@ public:
 
 private:
     Robot & _robot;
-    float _speed;
+    float _keyboardSpeed;
     std::vector<IrProximitySensor*> _irProximitySensors;
-    std::vector<LineTrackSensor *> _lineTrackSensors;
+    LineTrackSensorsNotifier _lineTrackSensorNotifiers;
     std::vector<SwitchSensor *> _switchSensors;
     std::vector<UltrasonicSensor *> _ultrasonicSensors;
     std::vector<SpeedSensor *> _speedSensors;
