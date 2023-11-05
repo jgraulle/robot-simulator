@@ -31,6 +31,7 @@ add_executable(robotSimulator
     src/speedSensor.cpp
     src/robotCommand.cpp
     src/jsonrpctcpserver.cpp
+    src/notifier/lineTrackSensorsNotifier.cpp
 )
 
 target_link_libraries(robotSimulator jsoncpp sfml-graphics sfml-window sfml-system)

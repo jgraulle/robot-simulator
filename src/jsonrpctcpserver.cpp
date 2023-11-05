@@ -40,6 +40,38 @@ void JsonRpcTcpServer::stopListening()
     }
 }
 
+void JsonRpcTcpServer::sendNotification(const std::string & methodName, const Json::Value & params)
+{
+    // Prepare message
+    Json::Value message;
+    message["jsonrpc"] = "2.0";
+    message["method"] = methodName;
+    message["params"] = params;
+
+    Json::StreamWriterBuilder jsonStreamWriterBuilder;
+    jsonStreamWriterBuilder["indentation"] = "";
+    std::unique_ptr<Json::StreamWriter> jsonStreamWriter(jsonStreamWriterBuilder.newStreamWriter());
+    asio::streambuf tcpStreambuf;
+    std::ostream tcpOutStream(&tcpStreambuf);
+    {
+        const std::lock_guard<std::mutex> lock(_clientSocketsMutex);
+        for (auto * socket : _clientSockets)
+        {
+            jsonStreamWriter->write(message, &tcpOutStream);
+            tcpOutStream << static_cast<char>(0x0A);
+            asio::write(*socket, tcpStreambuf);
+            assert(tcpStreambuf.size() == 0);
+        }
+    }
+
+#ifdef JSONRPC_MSG_DEBUG
+    // Print notification
+    std::cout << "Send notification to all client ";
+    jsonStreamWriter->write(message, &std::cout);
+    std::cout << std::endl;
+#endif
+}
+
 void JsonRpcTcpServer::bindMethod(const std::string & methodName, const Method & method)
 {
     const std::lock_guard<std::mutex> lock(_methodsMutex);
@@ -58,28 +90,37 @@ void JsonRpcTcpServer::listen()
     asio::ip::tcp::acceptor acceptor(_ioc, asio::ip::tcp::endpoint(asio::ip::tcp::v4(), _tcpPort));
     while (true)
     {
-        asio::ip::tcp::socket socket(_ioc);
-        acceptor.accept(socket);
-        std::thread([](JsonRpcTcpServer * thus, asio::ip::tcp::socket s){thus->session(std::move(s));}, this, std::move(socket)).detach();
+        auto socket = std::make_unique<asio::ip::tcp::socket>(_ioc);
+        acceptor.accept(*socket);
+        {
+            const std::lock_guard<std::mutex> lock(_clientSocketsMutex);
+            _clientSockets.insert(socket.get());
+        }
+#ifdef JSONRPC_CONNECT_DEBUG
+        std::cout << "New client connected" << std::endl;
+#endif
+        std::thread([](JsonRpcTcpServer * thus, std::unique_ptr<asio::ip::tcp::socket> s){thus->session(std::move(s));}, this, std::move(socket)).detach();
     }
 }
 
-void JsonRpcTcpServer::session(asio::ip::tcp::socket socket)
+void JsonRpcTcpServer::session(std::unique_ptr<asio::ip::tcp::socket> socket)
 {
-    asio::streambuf tcpStreambuf;
-    std::istream tcpInStream(&tcpStreambuf);
+    asio::streambuf tcpInStreambuf;
+    std::istream tcpInStream(&tcpInStreambuf);
+    asio::streambuf tcpOutStreambuf;
+    std::ostream tcpOutStream(&tcpOutStreambuf);
     Json::StreamWriterBuilder jsonStreamWriterBuilder;
     jsonStreamWriterBuilder["indentation"] = "";
     std::unique_ptr<Json::StreamWriter> jsonStreamWriter(jsonStreamWriterBuilder.newStreamWriter());
 
-    while (socket.is_open())
+    while (socket->is_open())
     {
         // Wait receive complete message
 #ifdef JSONRPC_MSG_DEBUG
         std::cout << "wait message..." << std::endl;
 #endif
         try {
-            asio::read_until(socket, tcpStreambuf, 0x0A);
+            asio::read_until(*socket, tcpInStreambuf, 0x0A);
         }
         catch (asio::system_error & e)
         {
@@ -164,14 +205,23 @@ void JsonRpcTcpServer::session(asio::ip::tcp::socket socket)
 #endif
 
             // Send response
-            std::ostream tcpOutStream(&tcpStreambuf);
             jsonStreamWriter->write(response, &tcpOutStream);
             tcpOutStream << static_cast<char>(0x0A);
-            asio::write(socket, tcpStreambuf);
+            {
+                const std::lock_guard<std::mutex> lock(_clientSocketsMutex);
+                asio::write(*socket, tcpOutStreambuf);
+            }
+            assert(tcpOutStreambuf.size() == 0);
         }
     }
-    socket.close();
+
+    {
+        const std::lock_guard<std::mutex> lock(_clientSocketsMutex);
+        _clientSockets.erase(socket.get());
+    }
 #ifdef JSONRPC_CONNECT_DEBUG
     std::cout << "Client disconnected" << std::endl;
 #endif
+    socket->close();
+    socket.release();
 }
