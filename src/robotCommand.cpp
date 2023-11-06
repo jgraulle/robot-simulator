@@ -1,10 +1,16 @@
 #include "robotCommand.hpp"
 
 #include "robot.hpp"
-#include "lineTrackSensor.hpp"
 #include "irProximitySensor.hpp"
-#include "ultrasonicSensor.hpp"
+#include "notifier/irProximitySensorsNotifier.hpp"
+#include "lineTrackSensor.hpp"
+#include "notifier/lineTrackSensorsNotifier.hpp"
 #include "speedSensor.hpp"
+#include "notifier/speedSensorsNotifier.hpp"
+#include "switchSensor.hpp"
+#include "notifier/switchSensorsNotifier.hpp"
+#include "ultrasonicSensor.hpp"
+#include "notifier/ultrasonicSensorsNotifier.hpp"
 
 #include <iostream>
 #include <json/value.h>
@@ -14,28 +20,47 @@ RobotCommand::RobotCommand(Robot & robot, uint16_t tcpPort)
     : JsonRpcTcpServer(tcpPort)
     , _robot(robot)
     , _keyboardSpeed(1.0)
-    , _lineTrackSensorNotifiers(this)
+    , _sensorsNotifier()
 {
+    auto irProximitySensorsNotifier = std::make_unique<IrProximitySensorNotifier>(this);
+    auto lineTrackSensorsIsDetectedNotifier = std::make_unique<LineTrackSensorsIsDetectedNotifier>(this);
+    auto lineTrackSensorsValueNotifier = std::make_unique<LineTrackSensorsValueNotifier>(this);
+    auto speedSensorsNotifier = std::make_unique<SpeedSensorsNotifier>(this);
+    auto switchSensorsNotifier = std::make_unique<SwitchSensorsNotifier>(this);
+    auto ultrasonicSensorsNotifier = std::make_unique<UltrasonicSensorsNotifier>(this);
+
     for (auto & sensor : _robot.getSensors())
     {
-        LineTrackSensor * lineTrackSensor = dynamic_cast<LineTrackSensor *>(sensor.get());
-        if (lineTrackSensor != nullptr)
-            _lineTrackSensorNotifiers.add(lineTrackSensor);
         IrProximitySensor * irProximitySensor = dynamic_cast<IrProximitySensor *>(sensor.get());
         if (irProximitySensor != nullptr)
-            _irProximitySensors.push_back(irProximitySensor);
-        SwitchSensor * switchSensor = dynamic_cast<SwitchSensor *>(sensor.get());
-        if (switchSensor != nullptr)
-            _switchSensors.push_back(switchSensor);
-        UltrasonicSensor * ultrasonicSensor = dynamic_cast<UltrasonicSensor *>(sensor.get());
-        if (ultrasonicSensor != nullptr)
-            _ultrasonicSensors.push_back(ultrasonicSensor);
+            irProximitySensorsNotifier->add(irProximitySensor);
+        LineTrackSensor * lineTrackSensor = dynamic_cast<LineTrackSensor *>(sensor.get());
+        if (lineTrackSensor != nullptr)
+        {
+            lineTrackSensorsIsDetectedNotifier->add(lineTrackSensor);
+            lineTrackSensorsValueNotifier->add(lineTrackSensor);
+        }
         SpeedSensor * speedSensor = dynamic_cast<SpeedSensor *>(sensor.get());
         if (speedSensor != nullptr)
-            _speedSensors.push_back(speedSensor);
+            speedSensorsNotifier->add(speedSensor);
+        SwitchSensor * switchSensor = dynamic_cast<SwitchSensor *>(sensor.get());
+        if (switchSensor != nullptr)
+            switchSensorsNotifier->add(switchSensor);
+        UltrasonicSensor * ultrasonicSensor = dynamic_cast<UltrasonicSensor *>(sensor.get());
+        if (ultrasonicSensor != nullptr)
+            ultrasonicSensorsNotifier->add(ultrasonicSensor);
     }
 
-    _lineTrackSensorNotifiers.bind();
+    _sensorsNotifier.push_back(std::move(irProximitySensorsNotifier));
+    _sensorsNotifier.push_back(std::move(lineTrackSensorsIsDetectedNotifier));
+    _sensorsNotifier.push_back(std::move(lineTrackSensorsValueNotifier));
+    _sensorsNotifier.push_back(std::move(speedSensorsNotifier));
+    _sensorsNotifier.push_back(std::move(switchSensorsNotifier));
+    _sensorsNotifier.push_back(std::move(ultrasonicSensorsNotifier));
+
+    for (auto & sensorNotifier : _sensorsNotifier)
+        sensorNotifier->bind();
+
     bindNotification("setMotorSpeed", [this](const Json::Value & params){
         const std::lock_guard<std::mutex> lock(_mutex);
         _robot.setMotorSpeed(Robot::motorIndexFromString(params["motorIndex"].asString()),
@@ -45,6 +70,7 @@ RobotCommand::RobotCommand(Robot & robot, uint16_t tcpPort)
         const std::lock_guard<std::mutex> lock(_mutex);
         _robot.setMotorsSpeed(params["rightValue"].asFloat(), params["leftValue"].asFloat());
     });
+    bindOnConnectSendNotification("setIsReady", [](){return Json::Value(true);});
 }
 
 RobotCommand::~RobotCommand()
@@ -57,8 +83,8 @@ void RobotCommand::update(float elapsedTime)
 
     std::vector<bool> isLineTrackDetectedOld;
     _robot.update(elapsedTime);
-
-    _lineTrackSensorNotifiers.notifyChanged();
+    for (auto & sensorNotifier : _sensorsNotifier)
+        sensorNotifier->notifyChanged();
 }
 
 void RobotCommand::keyEvent(sf::Event::EventType eventType, sf::Keyboard::Key keyboardCode)

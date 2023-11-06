@@ -84,6 +84,12 @@ void JsonRpcTcpServer::bindNotification(const std::string & notificationName, co
     _notifications.insert(std::make_pair(notificationName, notification));
 }
 
+void JsonRpcTcpServer::bindOnConnectSendNotification(const std::string & methodName, const ParamsGenerator & paramsGenerator)
+{
+    const std::lock_guard<std::mutex> lock(_onConnectSendNotificationMutex);
+    _onConnectSendNotification.insert(std::make_pair(methodName, paramsGenerator));
+}
+
 void JsonRpcTcpServer::listen()
 {
     std::cout << "Listen on TCP port " << _tcpPort << std::endl;
@@ -112,6 +118,27 @@ void JsonRpcTcpServer::session(std::unique_ptr<asio::ip::tcp::socket> socket)
     Json::StreamWriterBuilder jsonStreamWriterBuilder;
     jsonStreamWriterBuilder["indentation"] = "";
     std::unique_ptr<Json::StreamWriter> jsonStreamWriter(jsonStreamWriterBuilder.newStreamWriter());
+
+    // Send on connect notifications
+    {
+        const std::lock_guard<std::mutex> lock(_onConnectSendNotificationMutex);
+        for (auto & sendNotification : _onConnectSendNotification)
+        {
+            // Prepare message
+            Json::Value message;
+            message["jsonrpc"] = "2.0";
+            message["method"] = sendNotification.first;
+            message["params"] = sendNotification.second();
+            // Send message
+            jsonStreamWriter->write(message, &tcpOutStream);
+            tcpOutStream << static_cast<char>(0x0A);
+            {
+                const std::lock_guard<std::mutex> lockSockets(_clientSocketsMutex);
+                asio::write(*socket, tcpOutStreambuf);
+            }
+            assert(tcpOutStreambuf.size() == 0);
+        }
+    }
 
     while (socket->is_open())
     {

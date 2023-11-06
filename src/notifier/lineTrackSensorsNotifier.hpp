@@ -1,41 +1,28 @@
 #ifndef LINE_TRACK_SENSORS_NOTIFIER_HPP
 #define LINE_TRACK_SENSORS_NOTIFIER_HPP
 
-#include <cstdint>
-#include <vector>
-#include <memory>
-
-class LineTrackSensor;
-class JsonRpcTcpServer;
+#include "sensorsNotifier.hpp"
+#include "../lineTrackSensor.hpp"
 
 
-class LineTrackSensorsNotifier
+class LineTrackSensorsIsDetectedNotifier : public SensorsNotifier<LineTrackSensor, bool>
 {
 public:
-    LineTrackSensorsNotifier(JsonRpcTcpServer * server);
+    LineTrackSensorsIsDetectedNotifier(JsonRpcTcpServer * server) : SensorsNotifier(server) {}
 
-    void add(LineTrackSensor * sensor);
+    bool getValue(LineTrackSensor * sensor) const override {return sensor->isDetected();}
 
-    inline LineTrackSensor * getSensor(int index) {return _sensors.at(index)._sensor;}
+    std::string getNotificationName() const override {return "lineTrackIsDetected";}
+};
 
-    void notifyChanged();
-    void bind();
+class LineTrackSensorsValueNotifier : public SensorsNotifier<LineTrackSensor, std::uint8_t>
+{
+public:
+    LineTrackSensorsValueNotifier(JsonRpcTcpServer * server) : SensorsNotifier(server) {}
 
-private:
-    struct Sensor
-    {
-        LineTrackSensor * _sensor;
-        bool _isDetected;
-        int _isDetectedChangedCount;
-        std::uint8_t _value;
-        int _valueChangedCount;
-    };
+    std::uint8_t getValue(LineTrackSensor * sensor) const override {return sensor->getValue();}
 
-    JsonRpcTcpServer * _server;
-    std::vector<Sensor> _sensors;
-    //! @brief values (_isDetected and _value) can be used in simulator thread (main) with notify()
-    //! and json RCP receive thread with bind()
-    std::unique_ptr<std::mutex> _sensorsMutex;
+    std::string getNotificationName() const override {return "lineTrackValue";}
 };
 
 #endif

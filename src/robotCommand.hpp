@@ -2,18 +2,13 @@
 #define ROBOT_COMMAND_HPP
 
 #include "jsonrpctcpserver.hpp"
-#include "notifier/lineTrackSensorsNotifier.hpp"
+#include "notifier/sensorsNotifier.hpp"
 
 #include <vector>
 #include <SFML/Window/Event.hpp>
 #include <mutex>
 
 class Robot;
-class IrProximitySensor;
-class LineTrackSensor;
-class SwitchSensor;
-class UltrasonicSensor;
-class SpeedSensor;
 
 
 class RobotCommand : public JsonRpcTcpServer
@@ -30,11 +25,7 @@ public:
 private:
     Robot & _robot;
     float _keyboardSpeed;
-    std::vector<IrProximitySensor*> _irProximitySensors;
-    LineTrackSensorsNotifier _lineTrackSensorNotifiers;
-    std::vector<SwitchSensor *> _switchSensors;
-    std::vector<UltrasonicSensor *> _ultrasonicSensors;
-    std::vector<SpeedSensor *> _speedSensors;
+    std::vector<std::unique_ptr<SensorsNotifierBase>> _sensorsNotifier;
     std::mutex _mutex; // Robot and sensors can be used in simulator thread (main) and json RCP thread
 };
 

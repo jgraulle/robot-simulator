@@ -31,6 +31,9 @@ public:
     using Notification = std::function<void(Json::Value)>;
     void bindNotification(const std::string & notificationName, const Notification & notification);
 
+    using ParamsGenerator = std::function<Json::Value()>;
+    void bindOnConnectSendNotification(const std::string & methodName, const ParamsGenerator & paramsGenerator);
+
 private:
     void listen();
     void session(std::unique_ptr<asio::ip::tcp::socket> socket);
@@ -43,6 +46,8 @@ private:
     std::mutex _notificationsMutex;
     std::set<asio::ip::tcp::socket *> _clientSockets;
     std::mutex _clientSocketsMutex;
+    std::map<std::string, ParamsGenerator> _onConnectSendNotification;
+    std::mutex _onConnectSendNotificationMutex;
 };
 
 #endif
