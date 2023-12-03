@@ -9,6 +9,9 @@
 #include <mutex>
 
 class Robot;
+namespace sf {
+    class RenderWindow;
+}
 
 
 class RobotCommand : public JsonRpcTcpServer

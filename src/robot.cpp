@@ -7,7 +7,7 @@
 #include <numbers>
 
 
-Robot::Robot(const sf::Vector2f & size, float wheelsDistance, const Map & map)
+Robot::Robot(const sf::Vector2f position, const sf::Vector2f & size, float wheelsDistance, const Map & map)
     : _size(size)
     , _wheelsDistance(wheelsDistance)
     , _motorsSpeed({0.0, 0.0})
@@ -17,9 +17,11 @@ Robot::Robot(const sf::Vector2f & size, float wheelsDistance, const Map & map)
     , _collisionDetectors({
             SwitchSensor(sf::Vector2f(size.x/2.0, size.y/2.0), size.x, -90.0, map),
             SwitchSensor(sf::Vector2f(-size.x/2.0, -size.y/2.0), size.x, 90.0, map)})
+    , _positionInit(position)
 {
     _shape->setFillColor(sf::Color::Green);
     _shape->setOrigin(size.x/2.0, size.y/2.0);
+    setPosition(position);
 }
 
 Robot::MotorIndex Robot::motorIndexFromString(const std::string & str)
@@ -79,4 +81,11 @@ void Robot::draw(sf::RenderTarget & target, sf::RenderStates states) const
     for (const auto & collisionDetector : _collisionDetectors)
         collisionDetector.draw(target, states);
 #endif
+}
+
+void Robot::reset()
+{
+    setPosition(_positionInit);
+    setRotation(0.0);
+    setMotorsSpeed(0.0, 0.0);
 }
