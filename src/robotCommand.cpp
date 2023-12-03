@@ -14,6 +14,7 @@
 
 #include <iostream>
 #include <json/value.h>
+#include <SFML/Graphics/RenderWindow.hpp>
 
 
 RobotCommand::RobotCommand(Robot & robot, uint16_t tcpPort)
@@ -146,6 +147,8 @@ void RobotCommand::keyEvent(sf::Event::EventType eventType, sf::Keyboard::Key ke
             _robot.setMotorSpeed(Robot::MotorIndex::LEFT, _robot.getMotorSpeed(Robot::MotorIndex::LEFT)*0.9);
             _robot.setMotorSpeed(Robot::MotorIndex::RIGHT, _robot.getMotorSpeed(Robot::MotorIndex::RIGHT)*0.9);
             break;
+        case sf::Keyboard::Space:
+            _robot.reset();
         default:
             break;
         }

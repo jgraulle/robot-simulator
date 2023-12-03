@@ -21,7 +21,7 @@ class Robot : public sf::Drawable, public sf::Transformable
 {
 public:
     //! @param size: in pixel
-    Robot(const sf::Vector2f & size, float wheelsDistance, const Map & wall);
+    Robot(const sf::Vector2f position, const sf::Vector2f & size, float wheelsDistance, const Map & wall);
 
     inline void addSensor(std::unique_ptr<Sensor> && toAdd)
                 {_sensors.push_back(std::move(toAdd));}
@@ -51,6 +51,8 @@ public:
 
     void draw(sf::RenderTarget & target, sf::RenderStates states) const override;
 
+    void reset();
+
 private:
     const sf::Vector2f _size;
     const float _wheelsDistance;
@@ -60,6 +62,7 @@ private:
     std::vector<std::unique_ptr<Sensor>> _sensors;
     const Map & _map;
     std::vector<SwitchSensor> _collisionDetectors;
+    const sf::Vector2f _positionInit;
 };
 
 #endif

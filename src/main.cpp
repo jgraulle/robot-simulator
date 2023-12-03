@@ -66,8 +66,7 @@ int main(int argc, char** argv)
     //window.setFramerateLimit(60);
 
     // Build a robot
-    Robot robot(sf::Vector2f(20.0, 20.0), 20.0, map);
-    robot.setPosition(window.getView().getSize().x/2.0, 225.0);
+    Robot robot(sf::Vector2f(window.getView().getSize().x/2.0, 225.0), sf::Vector2f(20.0, 20.0), 20.0, map);
     robot.addSensor(std::make_unique<IrProximitySensor>(10.0, 80.0, sf::Vector2f(10.0, 10.0), 0.0, map));
     robot.addSensor(std::make_unique<IrProximitySensor>(10.0, 80.0, sf::Vector2f(10.0, -10.0), 0.0, map));
     robot.addSensor(std::make_unique<LineTrackSensor>(sf::Vector2f(5.0, 0.0), map, 128u));
