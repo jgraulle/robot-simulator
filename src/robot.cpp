@@ -10,7 +10,7 @@
 Robot::Robot(const sf::Vector2f position, const sf::Vector2f & size, float wheelsDistance, const Map & map)
     : _size(size)
     , _wheelsDistance(wheelsDistance)
-    , _motorsSpeed({0.0, 0.0})
+    , _motorsPower({0.0, 0.0})
     , _shape(std::make_unique<sf::RectangleShape>(size))
     , _sensors()
     , _map(map)
@@ -37,10 +37,10 @@ void Robot::update(float elapsedTime)
 {
     // Compute new position and orientation
     sf::Transform orientationTransform(sf::Transform().rotate(getRotation()));
-    float linearStep = (getMotorSpeed(MotorIndex::LEFT) + getMotorSpeed(MotorIndex::RIGHT))
-            / 2.0 * elapsedTime * MOTOR_SPEED_MAX;
-    float angularStep = (getMotorSpeed(MotorIndex::LEFT) - getMotorSpeed(MotorIndex::RIGHT))
-            / _wheelsDistance * elapsedTime * MOTOR_SPEED_MAX * 180.0 / std::numbers::pi;
+    float linearStep = (getMotorPower(MotorIndex::LEFT) + getMotorPower(MotorIndex::RIGHT))
+            / 2.0 * elapsedTime * MOTOR_POWER_TO_SPEED;
+    float angularStep = (getMotorPower(MotorIndex::LEFT) - getMotorPower(MotorIndex::RIGHT))
+            / _wheelsDistance * elapsedTime * MOTOR_POWER_TO_SPEED * 180.0 / std::numbers::pi;
     Transformable newTransform;
     newTransform.setPosition(getPosition() + orientationTransform.transformPoint(sf::Vector2f(linearStep, 0.0)));
     newTransform.setRotation(getRotation() + angularStep);
@@ -89,5 +89,5 @@ void Robot::reset()
 {
     setPosition(_positionInit);
     setRotation(0.0);
-    setMotorsSpeed(0.0, 0.0);
+    setMotorsPower(0.0, 0.0);
 }

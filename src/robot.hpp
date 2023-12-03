@@ -20,6 +20,8 @@ namespace sf
 class Robot : public sf::Drawable, public sf::Transformable
 {
 public:
+    static constexpr float MOTOR_POWER_TO_SPEED = 100.0;
+
     //! @param size: in pixel
     Robot(const sf::Vector2f position, const sf::Vector2f & size, float wheelsDistance, const Map & wall);
 
@@ -34,16 +36,16 @@ public:
 
     //! @return PWM between -1.0 and 1.0
     //! \{
-    inline const std::array<float, 2> & getMotorsSpeed() const {return _motorsSpeed;}
-    inline float getMotorSpeed(MotorIndex motorIndex) const
-            {return _motorsSpeed.at(static_cast<std::size_t>(motorIndex));}
+    inline const std::array<float, 2> & getMotorsPower() const {return _motorsPower;}
+    inline float getMotorPower(MotorIndex motorIndex) const
+            {return _motorsPower.at(static_cast<std::size_t>(motorIndex));}
     //! \}
 
     //! @param value: PWM between -1.0 and 1.0
     //! \{
-    inline void setMotorsSpeed(float rightValue, float leftValue) {_motorsSpeed = {rightValue, leftValue};}
-    inline void setMotorSpeed(MotorIndex motorIndex, float value)
-            {_motorsSpeed[static_cast<std::size_t>(motorIndex)] = value;}
+    inline void setMotorsPower(float rightValue, float leftValue) {_motorsPower = {rightValue, leftValue};}
+    inline void setMotorPower(MotorIndex motorIndex, float value)
+            {_motorsPower[static_cast<std::size_t>(motorIndex)] = value;}
     //! \}
 
     //! @param elapsedTime: in seconds
@@ -56,8 +58,7 @@ public:
 private:
     const sf::Vector2f _size;
     const float _wheelsDistance;
-    std::array<float, 2> _motorsSpeed;
-    float MOTOR_SPEED_MAX = 100.0;
+    std::array<float, 2> _motorsPower;
     std::unique_ptr<sf::Shape> _shape;
     std::vector<std::unique_ptr<Sensor>> _sensors;
     const Map & _map;
