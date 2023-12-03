@@ -45,6 +45,7 @@ target_compile_options(robotSimulator PRIVATE
 )
 
 #add_compile_definitions(COLLISION_DEBUG)
+#add_compile_definitions(SPEED_DEBUG)
 #add_compile_definitions(JSONRPC_CONNECT_DEBUG)
 #add_compile_definitions(JSONRPC_MSG_DEBUG)
 if (WIN32)
