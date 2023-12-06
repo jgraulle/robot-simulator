@@ -1,4 +1,4 @@
-#include "ultrasonicSensor.hpp"
+#include "ultrasoundSensor.hpp"
 
 #include "map.hpp"
 
@@ -14,7 +14,7 @@
 #include <random>
 
 
-UltrasonicSensor::UltrasonicSensor(std::size_t distanceMin, std::size_t distanceMax, float beamAngle,
+UltrasoundSensor::UltrasoundSensor(std::size_t distanceMin, std::size_t distanceMax, float beamAngle,
         const sf::Vector2f & position, float orientation, const Map & map)
     : _distanceMin(distanceMin)
     , _distanceMax(distanceMax)
@@ -29,7 +29,7 @@ UltrasonicSensor::UltrasonicSensor(std::size_t distanceMin, std::size_t distance
     setRotation(orientation);
 }
 
-void UltrasonicSensor::update(float, const sf::Transform & parentWorldTransform)
+void UltrasoundSensor::update(float, const sf::Transform & parentWorldTransform)
 {
     // To speed computation we only compute transformation for each edge
     auto worldTranform = parentWorldTransform * getTransform();
@@ -115,7 +115,7 @@ void UltrasonicSensor::update(float, const sf::Transform & parentWorldTransform)
     }
 }
 
-void UltrasonicSensor::draw(sf::RenderTarget & target, sf::RenderStates states) const
+void UltrasoundSensor::draw(sf::RenderTarget & target, sf::RenderStates states) const
 {
     if (_distanceDetected != 0.0)
     {
@@ -139,7 +139,7 @@ void UltrasonicSensor::draw(sf::RenderTarget & target, sf::RenderStates states) 
 #endif
 }
 
-std::size_t UltrasonicSensor::distanceRandomHelper() const
+std::size_t UltrasoundSensor::distanceRandomHelper() const
 {
     static std::mt19937 randomGenerator((std::random_device())());
     static std::uniform_int_distribution<std::size_t> distanceRandom(_distanceMin, _distanceMax);

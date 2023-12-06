@@ -9,8 +9,8 @@
 #include "notifier/speedSensorsNotifier.hpp"
 #include "switchSensor.hpp"
 #include "notifier/switchSensorsNotifier.hpp"
-#include "ultrasonicSensor.hpp"
-#include "notifier/ultrasonicSensorsNotifier.hpp"
+#include "ultrasoundSensor.hpp"
+#include "notifier/ultrasoundSensorsNotifier.hpp"
 
 #include <iostream>
 #include <json/value.h>
@@ -28,7 +28,7 @@ RobotCommand::RobotCommand(Robot & robot, uint16_t tcpPort)
     auto lineTrackSensorsValueNotifier = std::make_unique<LineTrackSensorsValueNotifier>(this);
     auto speedSensorsNotifier = std::make_unique<SpeedSensorsNotifier>(this);
     auto switchSensorsNotifier = std::make_unique<SwitchSensorsNotifier>(this);
-    auto ultrasonicSensorsNotifier = std::make_unique<UltrasonicSensorsNotifier>(this);
+    auto ultrasoundSensorsNotifier = std::make_unique<UltrasoundSensorsNotifier>(this);
 
     for (auto & sensor : _robot.getSensors())
     {
@@ -47,9 +47,9 @@ RobotCommand::RobotCommand(Robot & robot, uint16_t tcpPort)
         SwitchSensor * switchSensor = dynamic_cast<SwitchSensor *>(sensor.get());
         if (switchSensor != nullptr)
             switchSensorsNotifier->add(switchSensor);
-        UltrasonicSensor * ultrasonicSensor = dynamic_cast<UltrasonicSensor *>(sensor.get());
-        if (ultrasonicSensor != nullptr)
-            ultrasonicSensorsNotifier->add(ultrasonicSensor);
+        UltrasoundSensor * ultrasoundSensor = dynamic_cast<UltrasoundSensor *>(sensor.get());
+        if (ultrasoundSensor != nullptr)
+            ultrasoundSensorsNotifier->add(ultrasoundSensor);
     }
 
     _sensorsNotifier.push_back(std::move(irProximitySensorsNotifier));
@@ -57,7 +57,7 @@ RobotCommand::RobotCommand(Robot & robot, uint16_t tcpPort)
     _sensorsNotifier.push_back(std::move(lineTrackSensorsValueNotifier));
     _sensorsNotifier.push_back(std::move(speedSensorsNotifier));
     _sensorsNotifier.push_back(std::move(switchSensorsNotifier));
-    _sensorsNotifier.push_back(std::move(ultrasonicSensorsNotifier));
+    _sensorsNotifier.push_back(std::move(ultrasoundSensorsNotifier));
 
     for (auto & sensorNotifier : _sensorsNotifier)
         sensorNotifier->bind();

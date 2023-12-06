@@ -1,5 +1,5 @@
-#ifndef ULTRASONIC_SENSOR_HPP
-#define ULTRASONIC_SENSOR_HPP
+#ifndef ULTRASOUND_SENSOR_HPP
+#define ULTRASOUND_SENSOR_HPP
 
 #include "sensor.hpp"
 
@@ -10,7 +10,7 @@
 class Map;
 
 
-class UltrasonicSensor : public Sensor, public sf::Transformable
+class UltrasoundSensor : public Sensor, public sf::Transformable
 {
 public:
     //! @param distanceMin: in pixel
@@ -18,7 +18,7 @@ public:
     //! @param beamAngle: in degree
     //! @param position: in pixel
     //! @param orientation: in degree
-    UltrasonicSensor(std::size_t distanceMin, std::size_t distanceMax, float beamAngle,
+    UltrasoundSensor(std::size_t distanceMin, std::size_t distanceMax, float beamAngle,
             const sf::Vector2f & position, float orientation, const Map & map);
 
     inline std::size_t getDistanceDetected() const {return _distanceDetected;}
