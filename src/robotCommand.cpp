@@ -71,7 +71,7 @@ RobotCommand::RobotCommand(Robot & robot, uint16_t tcpPort)
         const std::lock_guard<std::mutex> lock(_mutex);
         _robot.setMotorsPower(params["rightValue"].asFloat(), params["leftValue"].asFloat());
     });
-    bindOnConnectSendNotification("setIsReady", [](){return Json::Value(true);});
+    bindOnConnectSendNotification("setIsReady", [](){return Json::Value();});
 }
 
 RobotCommand::~RobotCommand()
