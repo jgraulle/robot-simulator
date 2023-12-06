@@ -4,7 +4,7 @@
 #include "irProximitySensor.hpp"
 #include "lineTrackSensor.hpp"
 #include "switchSensor.hpp"
-#include "ultrasonicSensor.hpp"
+#include "ultrasoundSensor.hpp"
 #include "speedSensor.hpp"
 
 #include <SFML/Graphics.hpp>
@@ -72,7 +72,7 @@ int main(int argc, char** argv)
     robot.addSensor(std::make_unique<LineTrackSensor>(sf::Vector2f(5.0, 0.0), map, 128u));
     robot.addSensor(std::make_unique<SwitchSensor>(sf::Vector2f(11.0, -10.0), 3, 90.0, map));
     robot.addSensor(std::make_unique<SwitchSensor>(sf::Vector2f(11.0, 10.0), 3, -90.0, map));
-    robot.addSensor(std::make_unique<UltrasonicSensor>(10.0, 400.0, 30.0, sf::Vector2f(10.0, 0.0), 0.0, map));
+    robot.addSensor(std::make_unique<UltrasoundSensor>(10.0, 400.0, 30.0, sf::Vector2f(10.0, 0.0), 0.0, map));
     robot.addSensor(std::make_unique<SpeedSensor>(sf::Vector2f(0.0, 5.0), 6.5, 20u));
     robot.addSensor(std::make_unique<SpeedSensor>(sf::Vector2f(0.0, -5.0), 6.5, 20u));
     RobotCommand robotCommand(robot, tcpPort);
