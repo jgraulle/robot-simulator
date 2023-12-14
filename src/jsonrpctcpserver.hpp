@@ -46,7 +46,7 @@ private:
     std::mutex _notificationsMutex;
     std::set<asio::ip::tcp::socket *> _clientSockets;
     std::mutex _clientSocketsMutex;
-    std::map<std::string, ParamsGenerator> _onConnectSendNotification;
+    std::multimap<std::string, ParamsGenerator> _onConnectSendNotification;
     std::mutex _onConnectSendNotificationMutex;
 };
 
