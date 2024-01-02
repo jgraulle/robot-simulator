@@ -151,7 +151,8 @@ void JsonRpcTcpServer::session(std::unique_ptr<asio::ip::tcp::socket> socket)
         }
         catch (asio::system_error & e)
         {
-            if (e.code().value() == asio::error::eof)
+            if (   e.code().value() == asio::error::eof
+                || e.code().value() == asio::error::basic_errors::connection_reset)
                 break;
             throw e;
         }
