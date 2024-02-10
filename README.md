@@ -63,6 +63,6 @@ associated instructions:
 - in SwitchSensor::update() search for "TODO Step1"
 - in Robot::update() search for "TODO Step2"
 - in IrProximitySensor::update() search for "TODO Step2"
-- in SpeedSensor::update() search for "TODO Step1"
+- in EncoderWheelSensor::update() search for "TODO Step1"
 
 Once done create a merge request from tp1 branch to main.
