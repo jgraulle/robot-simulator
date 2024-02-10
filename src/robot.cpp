@@ -77,7 +77,7 @@ void Robot::update(float elapsedTime)
         // Frictional cannot change speed sign
         if (motorForce==0 && std::signbit(newSpeed)!=std::signbit(_motorsSpeed.at(motorIndex)))
             newSpeed = 0.0;
-#ifdef SPEED_DEBUG
+#ifdef MOTOR_DEBUG
         if (motorIndex == 0u)
             std::cout << std::fixed << std::setprecision(3)
                     << "speed=" << std::setw(8) << _motorsSpeed.at(motorIndex) << " pwm=" << _motorsPower.at(motorIndex)
