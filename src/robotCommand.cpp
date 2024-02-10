@@ -62,12 +62,12 @@ RobotCommand::RobotCommand(Robot & robot, uint16_t tcpPort)
     for (auto & sensorNotifier : _sensorsNotifier)
         sensorNotifier->bind();
 
-    bindNotification("setMotorSpeed", [this](const Json::Value & params){
+    bindNotification("setMotorPower", [this](const Json::Value & params){
         const std::lock_guard<std::mutex> lock(_mutex);
         _robot.setMotorPower(Robot::motorIndexFromString(params["motorIndex"].asString()),
                 params["value"].asFloat());
     });
-    bindNotification("setMotorsSpeed", [this](const Json::Value & params){
+    bindNotification("setMotorsPower", [this](const Json::Value & params){
         const std::lock_guard<std::mutex> lock(_mutex);
         _robot.setMotorsPower(params["rightValue"].asFloat(), params["leftValue"].asFloat());
     });
