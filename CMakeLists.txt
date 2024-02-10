@@ -28,7 +28,7 @@ add_executable(robotSimulator
     src/lineTrackSensor.cpp
     src/switchSensor.cpp
     src/ultrasoundSensor.cpp
-    src/speedSensor.cpp
+    src/encoderWheelSensor.cpp
     src/robotCommand.cpp
     src/jsonrpctcpserver.cpp
 )

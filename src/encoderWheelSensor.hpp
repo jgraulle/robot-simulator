@@ -1,14 +1,14 @@
-#ifndef SPEED_SENSOR_HPP
-#define SPEED_SENSOR_HPP
+#ifndef ENCODER_WHEEL_SENSOR_HPP
+#define ENCODER_WHEEL_SENSOR_HPP
 
 #include "sensor.hpp"
 
-class SpeedSensor : public Sensor
+class EncoderWheelSensor : public Sensor
 {
 public:
     //! @param position: in pixel
     //! @param wheelDiameter: in pixel
-    explicit SpeedSensor(const sf::Vector2f & position, float wheelDiameter,
+    explicit EncoderWheelSensor(const sf::Vector2f & position, float wheelDiameter,
             std::size_t latticeCount);
 
     //! @param elapsedTime: in seconds

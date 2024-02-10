@@ -5,8 +5,8 @@
 #include "notifier/irProximitySensorsNotifier.hpp"
 #include "lineTrackSensor.hpp"
 #include "notifier/lineTrackSensorsNotifier.hpp"
-#include "speedSensor.hpp"
-#include "notifier/speedSensorsNotifier.hpp"
+#include "encoderWheelSensor.hpp"
+#include "notifier/encoderWheelSensorsNotifier.hpp"
 #include "switchSensor.hpp"
 #include "notifier/switchSensorsNotifier.hpp"
 #include "ultrasoundSensor.hpp"
@@ -26,7 +26,7 @@ RobotCommand::RobotCommand(Robot & robot, uint16_t tcpPort)
     auto irProximitySensorsNotifier = std::make_unique<IrProximitySensorNotifier>(this);
     auto lineTrackSensorsIsDetectedNotifier = std::make_unique<LineTrackSensorsIsDetectedNotifier>(this);
     auto lineTrackSensorsValueNotifier = std::make_unique<LineTrackSensorsValueNotifier>(this);
-    auto speedSensorsNotifier = std::make_unique<SpeedSensorsNotifier>(this);
+    auto encoderWheelSensorsNotifier = std::make_unique<EncoderWheelSensorsNotifier>(this);
     auto switchSensorsNotifier = std::make_unique<SwitchSensorsNotifier>(this);
     auto ultrasoundSensorsNotifier = std::make_unique<UltrasoundSensorsNotifier>(this);
 
@@ -41,9 +41,9 @@ RobotCommand::RobotCommand(Robot & robot, uint16_t tcpPort)
             lineTrackSensorsIsDetectedNotifier->add(lineTrackSensor);
             lineTrackSensorsValueNotifier->add(lineTrackSensor);
         }
-        SpeedSensor * speedSensor = dynamic_cast<SpeedSensor *>(sensor.get());
-        if (speedSensor != nullptr)
-            speedSensorsNotifier->add(speedSensor);
+        EncoderWheelSensor * encoderWheelSensor = dynamic_cast<EncoderWheelSensor *>(sensor.get());
+        if (encoderWheelSensor != nullptr)
+            encoderWheelSensorsNotifier->add(encoderWheelSensor);
         SwitchSensor * switchSensor = dynamic_cast<SwitchSensor *>(sensor.get());
         if (switchSensor != nullptr)
             switchSensorsNotifier->add(switchSensor);
@@ -55,7 +55,7 @@ RobotCommand::RobotCommand(Robot & robot, uint16_t tcpPort)
     _sensorsNotifier.push_back(std::move(irProximitySensorsNotifier));
     _sensorsNotifier.push_back(std::move(lineTrackSensorsIsDetectedNotifier));
     _sensorsNotifier.push_back(std::move(lineTrackSensorsValueNotifier));
-    _sensorsNotifier.push_back(std::move(speedSensorsNotifier));
+    _sensorsNotifier.push_back(std::move(encoderWheelSensorsNotifier));
     _sensorsNotifier.push_back(std::move(switchSensorsNotifier));
     _sensorsNotifier.push_back(std::move(ultrasoundSensorsNotifier));
 
