@@ -3,7 +3,7 @@ Setup
 
 - If you do not have access to epita gitlab, follow the robot-git.pdf common documentation
 - For personal Linux:
-    - `sudo apt install g++-12 make libsfml-dev libasio-dev libjsoncpp-dev`
+    - `sudo apt install g++-12 make libjsoncpp-dev libsfml-dev libasio-dev`
 - For Windows only:
     - Install VS code for Windows from https://code.visualstudio.com/download
     - In VS code install `C/C++ Extension Pack`
