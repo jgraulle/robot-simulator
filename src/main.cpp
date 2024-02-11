@@ -51,14 +51,18 @@ int main(int argc, char** argv)
 {
     // Parse args for TCP server port
     uint16_t tcpPort = 6543;
+
+    std::string mapFile = "map.png";
     if (argc == 2)
     {
-        std::istringstream iss(argv[2]);
-        iss.exceptions(std::istringstream::failbit);
-        iss >> tcpPort;
+        mapFile = argv[1];
+        if (!mapFile.ends_with(".png"))
+            mapFile += ".png";
     }
-
-    Map map("../data/map.png", sf::Color::White);
+    if (mapFile.find('/') == std::string::npos)
+        mapFile = "../data/" + mapFile;
+    std::cout << mapFile << std::endl;
+    Map map(mapFile, sf::Color::White);
 
     sf::RenderWindow window(sf::VideoMode(map.getSize().x, map.getSize().y), "robot-simulator",
             sf::Style::Titlebar | sf::Style::Close);
