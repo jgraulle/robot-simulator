@@ -3,7 +3,7 @@ Setup
 
 - If you do not have access to epita gitlab, follow the robot-git.pdf common documentation
 - For personal Linux:
-    - `sudo apt install g++-12 make libsfml-dev libasio-dev libjsoncpp-dev`
+    - `sudo apt install g++-12 make libjsoncpp-dev libsfml-dev libasio-dev`
 - For Windows only:
     - Install VS code for Windows from https://code.visualstudio.com/download
     - In VS code install `C/C++ Extension Pack`
@@ -20,7 +20,7 @@ Setup
     - g++ --version
     - gdb --version
     - from https://cmake.org/download/ dowload and install cmake-3.28.0-rc3-windows-x86_64.msi, with Add CMake to the PATH for all users
-    - from msys console execute `pacman -S mingw-w64-ucrt-x86_64-sfml` and `pacman -S mingw-w64-ucrt-x86_64-asio`
+    - from msys console execute `pacman -S mingw-w64-ucrt-x86_64-sfml`, `pacman -S mingw-w64-ucrt-x86_64-asio` and `pacman -S mingw-w64-ucrt-x86_64-jsoncpp`
 - from https://gitlab.cri.epita.fr/jeremie.graulle/ssie-s9-robot-simulator create a personal fork
 to be able to commit
 - Add jeremie.graulle as Maintainer of this project.
