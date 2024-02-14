@@ -12,7 +12,7 @@ public:
 
     std::size_t getValue(EncoderWheelSensor * sensor) const override {return sensor->getValue();}
 
-    std::string getNotificationName() const override {return "speedValue";}
+    std::string getNotificationName() const override {return "encoderWheelValue";}
 };
 
 
