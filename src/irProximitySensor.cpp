@@ -29,7 +29,7 @@ void IrProximitySensor::update(float, const sf::Transform & parentWorldTransform
     auto worldTranform = parentWorldTransform * getTransform();
     _line[0].position = worldTranform.transformPoint(sf::Vector2f(0.0, 0.0));
     // TODO Step1 Replace the stub below to compute _distanceDetected and _line[1].position from
-    // _distanceMax, _map, worldTranform, position
+    // _distanceMax, _map, worldTranform
     // Begin stub
     _distanceDetected = _distanceMax;
     _line[1].position = worldTranform.transformPoint(sf::Vector2f(_distanceDetected, 0.0));

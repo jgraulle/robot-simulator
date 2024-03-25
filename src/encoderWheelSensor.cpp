@@ -10,8 +10,8 @@ EncoderWheelSensor::EncoderWheelSensor(const sf::Vector2f & position, float whee
     : _position(position)
     , _latticeStep(wheelDiameter*std::numbers::pi/latticeCount)
     , _lastGlobalPosition()
-    , _distance(0.0)
     , _value(0u)
+    , _distance(0.0)
 {
 }
 
