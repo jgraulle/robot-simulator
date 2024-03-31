@@ -14,6 +14,17 @@
 #include <iostream>
 
 
+constexpr float ROBOT_SIZE = 20.0; //!< The size of the robot in pixel.
+constexpr float WHEEL_DISTANCE = ROBOT_SIZE; //!< The distance between the both well of the robot in pixel.
+constexpr float WHEEL_DIAMETER = 6.5; //!< The diameter of the driving wheel in pixel.
+constexpr std::size_t LATICE_COUNT = 20.0; //!< The number of hole in this encoder wheel.
+constexpr float IR_DISTANCE_MIN = 8.0; //!< The minimal distance of IR sensor can detect in pixel.
+constexpr float IR_DISTANCE_MAX = 80.0; //!< The maximal distance of IR sensor can detect in pixel.
+constexpr float ULTRASOUND_DISTANCE_MIN = 2.0; //!< The minimal distance of ultrasound sensor can detect in pixel.
+constexpr float ULTRASOUND_DISTANCE_MAX = 400.0; //!< The maximal distance of ultrasound sensor can detect in pixel.
+constexpr float ULTRASOUND_BEAM_ANGLE = 30.0; //!< The beam angle in degree of the ultrasound cone detection.
+constexpr std::size_t SWITCH_SIZE = 3u; //!< The size of the line to simulate switch sensor in pixel.
+
 void event(sf::RenderWindow & window, RobotCommand & robotCommand)
 {
     sf::Event event;
@@ -70,17 +81,26 @@ int main(int argc, char** argv)
     //window.setFramerateLimit(60);
 
     // Build a robot
-    Robot robot(sf::Vector2f(90.0, 90.0), sf::Vector2f(20.0, 20.0), 20.0, map);
-    robot.addSensor(std::make_unique<IrProximitySensor>(0.0, 80.0, sf::Vector2f(10.0, 10.0), 90.0, map));
-    robot.addSensor(std::make_unique<IrProximitySensor>(0.0, 80.0, sf::Vector2f(10.0, -10.0), -90.0, map));
-    robot.addSensor(std::make_unique<IrProximitySensor>(0.0, 80.0, sf::Vector2f(-10.0, 10.0), 90.0, map));
-    robot.addSensor(std::make_unique<IrProximitySensor>(0.0, 80.0, sf::Vector2f(-10.0, -10.0), -90.0, map));
-    robot.addSensor(std::make_unique<LineTrackSensor>(sf::Vector2f(5.0, 0.0), map, 128u));
-    robot.addSensor(std::make_unique<SwitchSensor>(sf::Vector2f(11.0, 10.0), 3, -90.0, map));
-    robot.addSensor(std::make_unique<SwitchSensor>(sf::Vector2f(11.0, -10.0), 3, 90.0, map));
-    robot.addSensor(std::make_unique<UltrasoundSensor>(0.0, 400.0, 30.0, sf::Vector2f(10.0, 0.0), 0.0, map));
-    robot.addSensor(std::make_unique<EncoderWheelSensor>(sf::Vector2f(0.0, 5.0), 6.5, 20u));
-    robot.addSensor(std::make_unique<EncoderWheelSensor>(sf::Vector2f(0.0, -5.0), 6.5, 20u));
+    Robot robot(sf::Vector2f(90.0, 90.0), sf::Vector2f(ROBOT_SIZE, ROBOT_SIZE), ROBOT_SIZE, map);
+    robot.addSensor(std::make_unique<IrProximitySensor>(IR_DISTANCE_MIN, IR_DISTANCE_MAX,
+            sf::Vector2f(ROBOT_SIZE/2.0, ROBOT_SIZE/2.0), 90.0, map));
+    robot.addSensor(std::make_unique<IrProximitySensor>(IR_DISTANCE_MIN, IR_DISTANCE_MAX,
+            sf::Vector2f(ROBOT_SIZE/2.0, -ROBOT_SIZE/2.0), -90.0, map));
+    robot.addSensor(std::make_unique<IrProximitySensor>(IR_DISTANCE_MIN, IR_DISTANCE_MAX,
+            sf::Vector2f(-ROBOT_SIZE/2.0, ROBOT_SIZE/2.0), 90.0, map));
+    robot.addSensor(std::make_unique<IrProximitySensor>(IR_DISTANCE_MIN, IR_DISTANCE_MAX,
+            sf::Vector2f(-ROBOT_SIZE/2.0, -ROBOT_SIZE/2.0), -90.0, map));
+    robot.addSensor(std::make_unique<LineTrackSensor>(sf::Vector2f(ROBOT_SIZE/4.0, 0.0), map, 128u));
+    robot.addSensor(std::make_unique<SwitchSensor>(sf::Vector2f(ROBOT_SIZE/2.0+1.0, ROBOT_SIZE/2.0),
+            SWITCH_SIZE, -90.0, map));
+    robot.addSensor(std::make_unique<SwitchSensor>(sf::Vector2f(ROBOT_SIZE/2.0+1.0, -ROBOT_SIZE/2.0),
+            SWITCH_SIZE, 90.0, map));
+    robot.addSensor(std::make_unique<UltrasoundSensor>(ULTRASOUND_DISTANCE_MIN,
+            ULTRASOUND_DISTANCE_MAX, ULTRASOUND_BEAM_ANGLE, sf::Vector2f(ROBOT_SIZE/2.0, 0.0), 0.0, map));
+    robot.addSensor(std::make_unique<EncoderWheelSensor>(sf::Vector2f(0.0, WHEEL_DISTANCE/2.0),
+            WHEEL_DIAMETER, LATICE_COUNT));
+    robot.addSensor(std::make_unique<EncoderWheelSensor>(sf::Vector2f(0.0, -WHEEL_DISTANCE/2.0),
+            WHEEL_DIAMETER, LATICE_COUNT));
     RobotCommand robotCommand(robot, tcpPort);
     robotCommand.startListening();
 
